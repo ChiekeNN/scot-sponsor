@@ -20,7 +20,13 @@ Open the URL printed by Vite. For a production build, run `npm run build`; `npm 
 - Open job details and save/remove jobs. Saved IDs are stored in the browser's local storage on that device; clearing browser data removes them.
 - Read a practical guide linking to official UK government sources.
 - View the proposed products and prices, and preview the alerts interface.
+- A home dashboard with a daily job-search tip, links to tools and a shortlist summary.
+- Scottish income tax and employee National Insurance estimator for the **2026–27 tax year**, with a monthly budget planner. It is illustrative and excludes pensions, student loans, other income and tax-code adjustments. It is not tax, financial or immigration advice; verify current rates with [GOV.UK](https://www.gov.uk/guidance/rates-and-thresholds-for-employers-2026-to-2027).
+- An application tracker for roles entered by the user, including editable stages, notes and follow-up dates. Tracker data stays in browser local storage; no reminders or cloud syncing are provided. Avoid storing sensitive information.
+- Optional PWA installation and cached app shell in production. Installation is never required, the suggestion can be dismissed, and the app does not request notification permission. Browsers control whether they support installation and the native prompt. The app remembers installation or dismissal in the same browser's storage, but cannot reliably detect installation across different browsers, profiles or separately isolated iOS web-app storage. Closing the app and opening the site in a browser returns users to the normal website; uninstall via the device's app controls.
 - Responsive layout for mobile and desktop.
+
+Run `npm test` for calculator checks. The service worker is registered only for production builds: test installation and offline behaviour using `npm run build` followed by `npm run preview`, on HTTPS or localhost. The shell and previously cached resources can load offline, but there is no live job data or offline sync. Browser storage can be cleared or unavailable, so it should not be treated as a backup.
 
 ## Important limitations
 
