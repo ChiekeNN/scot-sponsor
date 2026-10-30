@@ -15,6 +15,9 @@ Open the URL printed by Vite. For a production build, run `npm run build`; `npm 
 
 ## What works
 
+- Visitors first see a public homepage with an introduction, product information and planned pricing. They can explore the dashboard and tools in an explicitly labelled demo without an account.
+- Sign-in and membership prompts describe planned functionality; no credentials or payment information are collected. Alert and membership actions surface the planned subscription options, but do **not** grant paid access.
+
 - Search example jobs by title, company, location, category or tag.
 - Filter by location, category and the sponsorship language in a listing; sort by newest or minimum salary.
 - Open job details and save/remove jobs. Saved IDs are stored in the browser's local storage on that device; clearing browser data removes them.
