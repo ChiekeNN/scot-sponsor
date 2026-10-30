@@ -21,6 +21,7 @@ Open the URL printed by Vite. For a production build, run `npm run build`; `npm 
 - Search example jobs by title, company, location, category or tag.
 - Filter by location, category and the sponsorship language in a listing; sort by newest or minimum salary.
 - Open job details and save/remove jobs. Saved IDs are stored in the browser's local storage on that device; clearing browser data removes them.
+- Explore the public Career Journal and dashboard journal: eight searchable, topic-filtered evergreen guides on job searching, CVs, interviews, sponsorship and reviewing an offer, with links to official sources. Guides are static editorial content, not a live or automatically updated news feed; readers should check current official information.
 - Read a practical guide linking to official UK government sources.
 - View the proposed products and prices, and preview the alerts interface.
 - A home dashboard with a daily job-search tip, links to tools and a shortlist summary.
