@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#6b8da7"/><stop offset=".52" stop-color="#cad3c9"/><stop offset="1" stop-color="#e1d1b5"/></linearGradient>
+    <linearGradient id="water" x2="0" y2="1"><stop stop-color="#7094a0"/><stop offset="1" stop-color="#1d5270"/></linearGradient>
+    <linearGradient id="front" x2="1" y2="1"><stop stop-color="#496c72"/><stop offset="1" stop-color="#173b50"/></linearGradient>
+    <linearGradient id="mist" x2="0" y2="1"><stop stop-color="#dfe6db" stop-opacity=".6"/><stop offset="1" stop-color="#dfe6db" stop-opacity="0"/></linearGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="13"/></filter>
+  </defs>
+  <path fill="url(#sky)" d="M0 0h1000v520H0z"/>
+  <circle cx="747" cy="100" r="49" fill="#f4dfbc" opacity=".66"/>
+  <path d="M0 217 85 153 129 178 212 99 260 153 303 126 406 207 481 150 553 204 630 141 704 203 785 128 865 198 920 155 1000 206v172H0z" fill="#7795a0"/>
+  <path d="m0 229 84-76 45 25 83-79 48 54 43-27 103 81 75-57 72 54 77-63 74 62 81-75 80 70 55-43 80 51" fill="none" stroke="#d8ded7" stroke-opacity=".38" stroke-width="3"/>
+  <path d="M0 256 82 208 159 236 229 179 289 224 355 184 415 230 487 192 565 246 645 193 705 230 778 181 857 235 930 193 1000 227v122H0z" fill="#527e8b"/>
+  <path d="M0 260c133-30 177 22 294-4 110-25 149-5 260 7 104 12 217-33 446-9v55H0z" fill="url(#mist)" filter="url(#blur)"/>
+  <path fill="url(#water)" d="M0 283h1000v237H0z"/>
+  <g fill="none" stroke="#d7ded3" stroke-opacity=".22"><path d="M477 316h281M551 329h310M408 345h180M675 355h268M523 374h186M755 389h190M439 403h230M608 428h257"/><path d="M415 320h32M773 339h107M686 377h61M487 390h121M768 413h160" stroke-width="2"/></g>
+  <path d="M0 313c68-4 119-30 198-36 73-6 112 9 164 21l56 29-62 23-356 24z" fill="#294d5c"/>
+  <path d="M0 341c126-26 188-47 293-42 44 2 82 12 119 29-124 9-195 55-412 81z" fill="#355f67"/>
+  <!-- A distant Scottish stone castle on the shore -->
+  <g fill="#253f4b"><path d="M190 273h151v26H190z"/><path d="M210 246h68v33h-68z"/><path d="M204 244h80v6h-80z"/><path d="M210 238h8v8h-8zm15 0h8v8h-8zm15 0h8v8h-8zm15 0h8v8h-8zm15 0h8v8h-8z"/><path d="M286 228h29v54h-29zM282 225h37v6h-37zM286 218h7v9h-7zm11 0h7v9h-7zm11 0h7v9h-7z"/><path d="M182 256h22v24h-22zM179 251h28v6h-28zM184 246h5v6h-5zm10 0h5v6h-5z"/></g>
+  <g fill="#c3c9bd" opacity=".7"><path d="M222 255h5v8h-5zm17 0h5v8h-5zm17 0h5v8h-5zm39-17h5v9h-5z"/></g>
+  <path d="M0 406c89-25 147-18 225-4 86 15 166 10 231 23 92 18 175 57 240 95H0z" fill="url(#front)"/>
+  <path d="M0 453c96-44 214-21 310-5 105 19 160 48 209 72H0z" fill="#183e4c"/>
+  <g fill="#a9b59c" opacity=".62"><circle cx="77" cy="443" r="2"/><circle cx="96" cy="433" r="2"/><circle cx="133" cy="447" r="2"/><circle cx="177" cy="437" r="2"/><circle cx="219" cy="455" r="2"/><circle cx="269" cy="453" r="2"/><circle cx="305" cy="464" r="2"/></g>
+  <path d="M0 0h1000v520H0z" fill="#15374d" opacity=".08"/>
+</svg>
