@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { matchesSponsor, registeredOffice } from '../lib/company-match.js';
 
 const projectUrl = process.env.VITE_SUPABASE_URL || 'https://ybsbeyyiwnhihkodbedv.supabase.co';
 const publicKey = process.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_2Cgs8BfrmrcqZcUVYprShg_DPpQgD2P';
@@ -32,20 +33,49 @@ export function makeCompanyHealthHandler({ create = createClient, request = fetc
       if (!entitled) return respond(res, 403, { error: 'An active Job Hunt Pass or super-admin access is required.' });
       if (!key) return respond(res, 503, { error: 'Companies House is not configured yet.', code: 'CH-NOT-CONFIGURED' });
       const url = new URL(req.url || '/', 'http://local');
-      const search = url.searchParams.get('search')?.trim();
+      const sponsorId = url.searchParams.get('sponsor')?.trim();
       const number = url.searchParams.get('number')?.trim().toUpperCase();
-      if ((!search && !number) || (search && number) || (search && (search.length < 2 || search.length > 150)) || (number && !/^[A-Z0-9]{8}$/.test(number))) return respond(res, 400, { error: 'Enter a company name or valid company number.' });
+      if (!sponsorId || !/^[1-9][0-9]{0,17}$/.test(sponsorId) || (number && !/^[A-Z0-9]{8}$/.test(number))) return respond(res, 400, { error: 'Please refresh the page and choose a sponsor record.' });
+      // Read the selected active directory row under the caller's RLS permissions.
+      const sponsorResult = await client.from('sponsor_directory').select('organisation_name,city_town,county_region').eq('id', sponsorId).maybeSingle();
+      if (sponsorResult.error) return respond(res, 503, { error: 'Could not load the selected sponsor. Please try again.' });
+      const sponsor = sponsorResult.data;
+      if (!sponsor) return respond(res, 404, { error: 'That sponsor record is no longer available.' });
+      if (!sponsor.organisation_name?.trim() || !sponsor.city_town?.trim()) return number ? respond(res, 409, { error: 'This sponsor does not have enough location information to check a company record.' }) : respond(res, 200, { items: [], truncated: false });
       const get = async path => request(`${base}${path}`, { headers: { Authorization: `Basic ${Buffer.from(`${key}:`).toString('base64')}`, Accept: 'application/json' }, signal: AbortSignal.timeout(10000) });
-      if (search) {
-        const response = await get(`/search/companies?q=${encodeURIComponent(search)}&items_per_page=10`);
-        if (!response.ok) return upstreamError(res, response.status);
-        const json = await response.json();
-        return respond(res, 200, { items: (json.items || []).map(item => ({ number: item.company_number, name: item.title, status: item.company_status, address: item.address_snippet, date: item.date_of_creation })).filter(item => /^[A-Z0-9]{8}$/.test(item.number || '')) });
+      if (!number) {
+        const matches = [];
+        const pageSize = 100;
+        const pageLimit = 5;
+        let truncated = false;
+        let offset = 0;
+        for (let page = 0; page < pageLimit; page++) {
+          const response = await get(`/search/companies?q=${encodeURIComponent(sponsor.organisation_name.trim())}&items_per_page=${pageSize}&start_index=${offset}`);
+          if (!response.ok) return upstreamError(res, response.status);
+          const json = await response.json();
+          if (!Array.isArray(json.items)) return respond(res, 502, { error: 'Companies House returned an incomplete search response. Please try again.' });
+          const items = json.items;
+          for (const item of items) {
+            if (matchesSponsor(item, sponsor) && !matches.some(match => match.number === item.company_number)) matches.push({ number: item.company_number, name: item.title, status: item.company_status, address: registeredOffice(item.address), date: item.date_of_creation });
+          }
+          const scanned = offset + items.length;
+          const hasMore = Number.isInteger(json.total_results) ? scanned < json.total_results : items.length === pageSize;
+          if (!items.length) { if (hasMore) truncated = true; break; }
+          if (!hasMore) break;
+          offset = scanned;
+          if (page === pageLimit - 1) truncated = true;
+        }
+        return respond(res, 200, { items: matches, truncated });
       }
       const response = await get(`/company/${number}`);
       if (response.status === 404) return respond(res, 404, { error: 'Company not found.' });
       if (!response.ok) return upstreamError(res, response.status);
       const profile = await response.json();
+      // Revalidate the name and office because the Companies House record can
+      // change between search and viewing, and company numbers are user input.
+      if (profile.company_number !== number || !matchesSponsor({ title: profile.company_name, company_number: profile.company_number, address: profile.registered_office_address }, sponsor)) {
+        return respond(res, 409, { error: 'The company name or Scottish registered office no longer matches this directory record. Check the official register.' });
+      }
       let charges = null;
       if (profile.has_charges === false) charges = { outstanding: 0, partSatisfied: 0 };
       else {
@@ -62,7 +92,7 @@ export function makeCompanyHealthHandler({ create = createClient, request = fetc
           if (!next.length || items.length > total) break;
         }
       }
-      return respond(res, 200, { number: profile.company_number, name: profile.company_name, status: profile.company_status, established: profile.date_of_creation || null, sicCodes: profile.sic_codes || [], charges, fetchedAt: new Date().toISOString(), recordUrl: `https://find-and-update.company-information.service.gov.uk/company/${number}` });
+      return respond(res, 200, { number: profile.company_number, name: profile.company_name, status: profile.company_status, established: profile.date_of_creation || null, sicCodes: profile.sic_codes || [], charges, fetchedAt: new Date().toISOString(), registeredOffice: registeredOffice(profile.registered_office_address), recordUrl: `https://find-and-update.company-information.service.gov.uk/company/${number}` });
     } catch { return respond(res, 502, { error: 'Company information is temporarily unavailable.' }); }
   };
 }
