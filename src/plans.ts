@@ -23,6 +23,7 @@ export const plans = {
       'Email alerts matched to your role and location',
       'Professional CV builder with print-to-PDF and text download',
       'ATS-style CV keyword review against a job description',
+      'Search and download the Scottish sponsor directory by industry or location',
       'Job-search checklist and employer outreach templates',
       'Full listings, direct links and sponsor information where available',
     ],
