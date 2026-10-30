@@ -2,3 +2,9 @@ node_modules
 dist
 .DS_Store
 *.local
+
+# Subscriber-only source data; never publish with the static site.
+/private-data/
+.env
+.env.*
+!.env.example

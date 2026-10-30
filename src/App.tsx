@@ -4,6 +4,10 @@ import { PublicLanding, AccessModal } from './Landing';
 import { plans } from './plans';
 import { CvStudio } from './CvStudio';
 import { Journal } from './Journal';
+import { SponsorDirectory } from './SponsorDirectory';
+import { AccountCenter } from './AccountCenter';
+import { directoryClient } from './directoryClient';
+import type { Session } from '@supabase/supabase-js';
 import { BookOpen, FileText, Home, Calculator, ClipboardList, ArrowDownUp, ArrowLeft, ArrowRight, ArrowUpRight, BadgeCheck, Bell, Bookmark, Briefcase, Building2, Check, CheckCircle2, ChevronDown, ChevronRight, HelpCircle, Clock3, ExternalLink, Filter, GraduationCap, Heart, Info, LayoutDashboard, MapPin, Menu, Search, ShieldCheck, SlidersHorizontal, Sparkles, X } from 'lucide-react';
 
 type Status = 'confirmed' | 'possible' | 'blocked';
@@ -26,6 +30,8 @@ const categories = ['All categories', 'Technology', 'Data & analytics', 'Enginee
 function readSaved(): number[] { try { const value = JSON.parse(localStorage.getItem('scotsponsor-saved') || '[]'); return Array.isArray(value) ? value.filter((n): n is number => typeof n === 'number') : []; } catch { return []; } }
 function App() {
   const [showLanding, setShowLanding] = useState(true);
+  const [session, setSession] = useState<Session | null>(null);
+  const [recovering, setRecovering] = useState(false);
   const [accessModal, setAccessModal] = useState<'membership' | 'signin' | null>(null);
   const [search, setSearch] = useState('');
   const [location, setLocation] = useState('All locations');
@@ -33,12 +39,13 @@ function App() {
   const [status, setStatus] = useState('All sponsorship');
   const [sort, setSort] = useState('Newest first');
   const [saved, setSaved] = useState<number[]>(readSaved);
-  const [page, setPage] = useState<'home' | 'jobs' | 'saved' | 'guide' | 'plans' | 'tools' | 'tracker' | 'cv' | 'journal'>('home');
+  const [page, setPage] = useState<'home' | 'jobs' | 'saved' | 'guide' | 'plans' | 'tools' | 'tracker' | 'cv' | 'journal' | 'directory' | 'account'>('home');
   const [selected, setSelected] = useState<Job | null>(null);
   const [modal, setModal] = useState<'alerts' | 'about' | null>(null);
   const [alertEmail, setAlertEmail] = useState('');
   const [alertSaved, setAlertSaved] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
+  useEffect(() => { if (!directoryClient) return; let live = true; directoryClient.auth.getSession().then(({data}) => { if (live && data.session) { setSession(data.session); setShowLanding(false); setPage('account'); } }); const {data} = directoryClient.auth.onAuthStateChange((event, next) => { if (!live) return; setSession(next); if (event === 'PASSWORD_RECOVERY') { setRecovering(true); setShowLanding(false); setPage('account'); } if (event === 'SIGNED_OUT') setRecovering(false); if (event === 'SIGNED_IN' && next) { setShowLanding(false); setPage('account'); } }); return () => { live = false; data.subscription.unsubscribe(); }; }, []);
   useEffect(() => { localStorage.setItem('scotsponsor-saved', JSON.stringify(saved)); }, [saved]);
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -51,7 +58,7 @@ function App() {
   const openDemo = (destination: 'home' | 'jobs' | 'tools' | 'tracker' = 'home') => { setAccessModal(null); setShowLanding(false); navigate(destination); };
   const openLanding = () => { setMobileMenu(false); setShowLanding(true); window.scrollTo({ top: 0, behavior: 'smooth' }); };
   return <>
-    {showLanding && <PublicLanding onDemo={openDemo} onMembership={() => setAccessModal('membership')} onSignIn={() => setAccessModal('signin')}/>}
+    {showLanding && <PublicLanding onDemo={openDemo} onMembership={() => setAccessModal('membership')} onSignIn={() => { setShowLanding(false); navigate('account'); }}/>}
     <div className="app-shell" hidden={showLanding}>
     <aside className={`sidebar ${mobileMenu ? 'open' : ''}`}>
       <button className="brand" onClick={openLanding} aria-label="ScotSponsor homepage"><span className="brand-mark" aria-hidden="true"><span className="saltire"/></span><span>scot<span className="brand-accent">sponsor</span><small>OPPORTUNITY, ROOTED IN SCOTLAND</small></span></button>
@@ -65,9 +72,10 @@ function App() {
         <button className={page === 'tools' ? 'active' : ''} onClick={() => navigate('tools')}><Calculator size={18}/> Calculators</button>
         <button className={page === 'tracker' ? 'active' : ''} onClick={() => navigate('tracker')}><ClipboardList size={18}/> Application tracker</button>
         <button className={page === 'cv' ? 'active' : ''} onClick={() => navigate('cv')}><FileText size={18}/> CV studio <span className="premium-label">PREVIEW</span></button>
+        <button className={page === 'directory' ? 'active' : ''} onClick={() => navigate('directory')}><Building2 size={18}/> Sponsor directory <span className="premium-label">MEMBERS</span></button>
       </nav>
       <div className="side-label second">YOUR ACCOUNT</div>
-      <nav className="side-nav" aria-label="Account navigation">
+      <nav className="side-nav" aria-label="Account navigation"><button className={page === 'account' ? 'active' : ''} onClick={() => navigate('account')}><ShieldCheck size={18}/> My account</button>
         <button onClick={() => setAccessModal('membership')}><Bell size={18}/> Job alerts <span className="premium-label">PLANNED</span></button>
         <button className={page === 'plans' ? 'active' : ''} onClick={() => navigate('plans')}><Sparkles size={18}/> Plans & pricing</button>
       </nav>
@@ -75,9 +83,9 @@ function App() {
     </aside>
     {mobileMenu && <button className="mobile-overlay" onClick={() => setMobileMenu(false)} aria-label="Close menu"/>}
     <div className="main-area">
-      <header className="topbar"><button className="menu-button" onClick={() => setMobileMenu(true)} aria-label="Open menu"><Menu size={21}/></button><div className="breadcrumb">Discover <ChevronRight size={14}/> <strong>{page === 'home' ? 'Home' : page === 'jobs' ? 'Explore jobs' : page === 'saved' ? 'Saved jobs' : page === 'guide' ? 'Visa resources' : page === 'tools' ? 'Calculators' : page === 'tracker' ? 'Application tracker' : page === 'cv' ? 'CV studio' : page === 'journal' ? 'Career journal' : 'Plans & pricing'}</strong></div><div className="top-actions"><button className="back-to-website" onClick={openLanding}>Website home</button><span className="demo-pill"><span/> DEMO WORKSPACE</span><button className="icon-button top-bell" onClick={() => setAccessModal('membership')} aria-label="Job alerts"><Bell size={19}/></button><button className="avatar" onClick={() => setAccessModal('signin')} aria-label="Sign in">S</button></div></header>
+      <header className="topbar"><button className="menu-button" onClick={() => setMobileMenu(true)} aria-label="Open menu"><Menu size={21}/></button><div className="breadcrumb">Discover <ChevronRight size={14}/> <strong>{page === 'home' ? 'Home' : page === 'jobs' ? 'Explore jobs' : page === 'saved' ? 'Saved jobs' : page === 'guide' ? 'Visa resources' : page === 'tools' ? 'Calculators' : page === 'tracker' ? 'Application tracker' : page === 'cv' ? 'CV studio' : page === 'journal' ? 'Career journal' : page === 'directory' ? 'Sponsor directory' : page === 'account' ? 'My account' : 'Plans & pricing'}</strong></div><div className="top-actions"><button className="back-to-website" onClick={openLanding}>Website home</button><span className="demo-pill"><span/> {session ? 'MEMBER ACCOUNT' : 'DEMO WORKSPACE'}</span><button className="icon-button top-bell" onClick={() => setAccessModal('membership')} aria-label="Job alerts"><Bell size={19}/></button><button className="avatar" onClick={() => navigate('account')} aria-label="My account">S</button></div></header>
       <main className="content">
-        {page === 'home' ? <HomePage navigate={navigate} savedCount={saved.length}/> : page === 'tools' ? <ToolsPage/> : page === 'tracker' ? <TrackerPage/> : page === 'cv' ? <CvStudio/> : page === 'journal' ? <Journal/> : isListings ? <>
+        {page === 'home' ? <HomePage navigate={navigate} savedCount={saved.length}/> : page === 'tools' ? <ToolsPage/> : page === 'tracker' ? <TrackerPage/> : page === 'cv' ? <CvStudio/> : page === 'journal' ? <Journal/> : page === 'directory' ? <SponsorDirectory onMembership={() => setAccessModal('membership')}/> : page === 'account' ? <AccountCenter session={session} recovering={recovering} onRecoveryComplete={() => setRecovering(false)} goDirectory={() => navigate('directory')} goCv={() => navigate('cv')} goTools={() => navigate('tools')} goJournal={() => navigate('journal')}/> : isListings ? <>
           <section className="hero"><div className="hero-content"><div className="eyebrow"><span className="eyebrow-dot"/> YOUR NEXT CHAPTER STARTS HERE</div><h1>{page === 'saved' ? <>Your opportunities,<br/><em>all in one place.</em></> : <>A brighter career<br/><em>starts in Scotland.</em></>}</h1><p>{page === 'saved' ? 'Keep track of the roles that caught your eye and come back whenever you’re ready.' : 'Discover opportunities, understand sponsorship, and take the next step with a little more confidence.'}</p><div className="hero-foot"><span className="hero-saltire" aria-hidden="true"><span className="saltire"/></span><span>Made for your future in Scotland</span></div></div><div className="hero-art" aria-hidden="true"><div className="art-label"><span>✦</span> MADE IN SCOTLAND, FOR YOUR FUTURE</div></div></section>
           <div className="demo-notice"><Info size={17}/><span><strong>You're exploring a demo.</strong> These are illustrative jobs, not live or verified listings. <button onClick={() => setModal('about')}>Learn more</button></span></div>
           <section className="intro-row"><div><div className="section-kicker">OPPORTUNITIES ACROSS SCOTLAND <span>✳</span></div><h2>{page === 'saved' ? 'Your saved jobs' : 'Find your place in Scotland'}</h2><p>{page === 'saved' ? 'Your shortlist is saved on this device.' : 'From the Central Belt to the Highlands, find your next opportunity.'}</p></div><button className="outline-button alerts-button" onClick={() => setAccessModal('membership')}><Bell size={16}/> Set up job alerts</button></section>
@@ -92,7 +100,7 @@ function App() {
     </div>
     {(selected || modal) && <div className="modal-backdrop" onMouseDown={() => { setSelected(null); setModal(null); }}><div className="modal" role="dialog" aria-modal="true" aria-label={selected ? 'Job details' : modal === 'alerts' ? 'Job alerts' : 'About ScotSponsor'} onMouseDown={e => e.stopPropagation()}><button className="modal-close" onClick={() => {setSelected(null); setModal(null);}} aria-label="Close"><X size={20}/></button>{selected ? <><div className={`company-logo modal-logo ${selected.color}`}>{selected.initial}<span>✦</span></div><div className="section-kicker">EXAMPLE OPPORTUNITY</div><h2>{selected.title}</h2><p className="modal-company">{selected.company} · {selected.location} · {selected.area}</p><span className={`status ${selected.status}`}><span className="status-dot"/>{statusInfo[selected.status].label}</span><div className="modal-details"><div><span>Salary range</span><strong>{selected.salary} / year</strong></div><div><span>Employment</span><strong>{selected.type}</strong></div></div><h3>About this role</h3><p>{selected.description}</p><h3>Sponsorship note</h3><p>{statusInfo[selected.status].description} A sponsor licence alone does not confirm sponsorship for a particular role.</p><div className="modal-warning"><Info size={17}/> This is fictional sample data. There is no real application link for this role.</div><button className="modal-primary" onClick={() => toggleSaved(selected.id)}><Bookmark size={17} fill={saved.includes(selected.id) ? 'currentColor' : 'none'}/>{saved.includes(selected.id) ? 'Remove from saved jobs' : 'Save this job'}</button></> : modal === 'alerts' ? <><div className="modal-icon"><Bell size={22}/></div><div className="section-kicker">STAY IN THE LOOP</div><h2>Job alerts, coming soon.</h2><p>We’re working towards helpful alerts for opportunities that fit your search. This demo cannot send email, Telegram or WhatsApp alerts yet.</p><form onSubmit={e => {e.preventDefault(); setAlertSaved(true);}}><label className="form-label" htmlFor="alert-email">Try the alert preference</label><div className="email-row"><input id="alert-email" type="email" required placeholder="you@example.com" value={alertEmail} onChange={e => { setAlertEmail(e.target.value); setAlertSaved(false); }}/><button type="submit">Preview</button></div></form>{alertSaved && <div className="form-success"><CheckCircle2 size={17}/> Preview only — your email was not submitted or saved.</div>}<p className="fine-print">No mailing list or notification service is connected.</p></> : <><div className="modal-icon"><ShieldCheck size={22}/></div><div className="section-kicker">WELCOME TO SCOTSPONSOR</div><h2>A clearer path to your next chapter.</h2><p>ScotSponsor is a prototype for exploring Scotland-focused job opportunities and sponsorship information.</p><div className="modal-warning"><Info size={17}/> All jobs and employers shown are fictional. Sponsor verification, live job feeds, payments and notifications are not connected.</div><p>For current visa requirements, always refer to official GOV.UK guidance or a qualified immigration adviser.</p><button className="modal-primary" onClick={() => {setModal(null); navigate('guide');}}>Explore visa resources <ArrowRight size={16}/></button></>}</div></div>}
   </div>
-    {accessModal && <AccessModal mode={accessModal} onClose={() => setAccessModal(null)} onDemo={() => openDemo()} onMembership={() => setAccessModal('membership')}/>}
+    {accessModal && <AccessModal mode={accessModal} onClose={() => setAccessModal(null)} onDemo={() => openDemo()} onMembership={() => setAccessModal('membership')} onDirectory={() => { setAccessModal(null); setShowLanding(false); navigate('directory'); }}/>}
   </>;
 }
 export default App;
