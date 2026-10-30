@@ -53,3 +53,11 @@ The directory data is imported in the configured database. Accounts require emai
 7. Add automated tests, accessibility checks, analytics with consent, error monitoring and deployment configuration before launch.
 
 The app is independent and is not affiliated with the UK Home Office. It does not provide immigration advice.
+
+## Job Hunt member tools and admin intelligence
+
+The Graduate Visa Switch Planner requires an active Job Hunt Pass or super-admin access (verified by the server). It produces suggested dates based on the expiry and optional target submission date; its default 30-day buffer and milestone offsets are planning estimates, not legal deadlines. It does not save dates or send reminders, and users should check the current GOV.UK rules and seek regulated advice where appropriate.
+
+The AI Cover Letter Generator is implemented but **does not generate letters until an AI connection is configured**. It is designed for the OpenAI API; set `OPENAI_API_KEY` as a server-only Vercel environment variable, optionally `OPENAI_MODEL`, then redeploy. Do not use a `VITE_` prefix or share the key in chat. Before enabling, the operator should approve provider terms, privacy handling, model costs and a spending cap. The user must consent before their entered text is sent to OpenAI; the app does not save the inputs or draft. Provider data retention policies apply. Member use is limited to 10 attempts per UTC day (failures can count); super-admin access is not capped. The API validates sessions and Job Hunt entitlements server-side. Review AI output for factual accuracy.
+
+Super-admin analytics use server-side aggregate queries for all current accounts and manually managed entitlements. Active pass counts are not verified payments; revenue and subscription conversions are not available. The Scotland industry and town rankings describe rows in the imported, undated directory snapshot, not live vacancies or market demand. The administrative member list remains limited to its most recent 1,000 account/pass rows. See `20261030230000_admin_analytics_cover_quota.sql` for the new access-controlled RPCs and quota table.
