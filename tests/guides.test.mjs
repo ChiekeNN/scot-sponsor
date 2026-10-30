@@ -25,3 +25,14 @@ test('guides cover the main job-search topics', () => {
   const categories = new Set(guides.map(guide => guide.category));
   for (const category of ['Job search', 'CV & applications', 'Interviews', 'Working in Scotland', 'Sponsorship']) assert.ok(categories.has(category));
 });
+
+test('immigration guides cite the official sources and state when checked', () => {
+  const relationship = guides.find(g => g.slug === 'visa-when-a-relationship-ends');
+  const sponsor = guides.find(g => g.slug === 'if-your-visa-sponsor-loses-licence');
+  assert.equal(relationship.reviewed, '30 October 2026'); assert.equal(sponsor.reviewed, '30 October 2026');
+  assert.ok(relationship.sources.some(s => s.url === 'https://www.gov.uk/visas-when-you-separate-or-divorce'));
+  assert.ok(relationship.sources.some(s => s.url.startsWith('https://www.mygov.scot/')));
+  assert.ok(sponsor.sources.some(s => s.url === 'https://www.gov.uk/employee-lose-sponsor-licence'));
+  assert.match(relationship.sections.map(s=>s.body).join(' '), /999/);
+  assert.match(sponsor.sections.map(s=>s.body).join(' '), /suspend/i);
+});
