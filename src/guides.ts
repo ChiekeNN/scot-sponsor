@@ -1,12 +1,36 @@
 export type Guide = {
   slug: string; category: 'Job search' | 'CV & applications' | 'Interviews' | 'Working in Scotland' | 'Sponsorship';
-  title: string; description: string; reading: string; accent: string;
+  title: string; description: string; reading: string; accent: string; reviewed?: string;
   intro: string; sections: { heading: string; body: string; bullets?: string[] }[];
   takeaway: string; sources: { label: string; url: string }[];
 };
 
 // Evergreen editorial guides, not live news or immigration advice.
 export const guides: Guide[] = [
+  {
+    slug: 'visa-when-a-relationship-ends', category: 'Sponsorship', title: 'If your relationship ends: understanding your visa options',
+    description: 'A sensitive, practical guide to notifying the Home Office and finding support in Scotland.', reading: '5 min read', accent: 'lavender', reviewed: '30 October 2026',
+    intro: 'A separation can be difficult, and immigration questions may add to the uncertainty. If your permission is based on your relationship, check the official guidance promptly and get individual advice. You do not need to handle this alone.',
+    sections: [
+      { heading: 'Who may need to tell the Home Office?', body: 'GOV.UK says you must usually tell the Home Office if you separate or divorce and your visa is based on the relationship. This includes some partner and dependant visas and may include an EU Settlement Scheme family permit or dependant pre-settled status. The same rules can apply if your former partner’s permission depends on you. Different rules apply to British National (Overseas) visas: GOV.UK says holders do not need to report separation or divorce.' },
+      { heading: 'Tell the Home Office safely', body: 'GOV.UK provides an online service or a postal route. For a postal notification, the guidance describes a public statement if you do not want details from your letter shared with your former partner, or a consent form if you do. Check the current instructions and consider getting independent help if sharing information could put you at risk. If you later reconcile, GOV.UK says to update the Home Office.' },
+      { heading: 'Explore your options to stay', body: 'If your permission is based on a relationship that has ended and you want to stay, GOV.UK says to apply as soon as possible after the breakdown and not wait for your current visa to expire. Depending on your circumstances, you may be able to apply on a work, parent or private-life route, or for settlement in certain cases, including where a relationship ended because of domestic abuse. None of these routes is automatic; check eligibility and seek regulated immigration advice.' },
+      { heading: 'Safety and support in Scotland', body: 'If you or your children are in immediate danger, call 999. Scotland’s Domestic Abuse and Forced Marriage Helpline offers confidential support to anyone affected: 0800 027 1234, 24 hours a day. You can also use the mygov.scot support link below. Consider whether it is safe to use this device or receive communications before seeking help.' },
+    ], takeaway: 'If it is safe to do so, read the official guidance and contact a regulated immigration adviser about your own circumstances.',
+    sources: [{ label: 'GOV.UK: tell the Home Office', url: 'https://www.gov.uk/visas-when-you-separate-or-divorce' }, { label: 'GOV.UK: apply to stay in the UK', url: 'https://www.gov.uk/visas-when-you-separate-or-divorce/apply-stay-uk' }, { label: 'mygov.scot: support in Scotland', url: 'https://www.mygov.scot/relationship-problem' }, { label: 'GOV.UK: find an immigration adviser', url: 'https://www.gov.uk/find-an-immigration-adviser' }],
+  },
+  {
+    slug: 'if-your-visa-sponsor-loses-licence', category: 'Sponsorship', title: 'If your visa sponsor loses its licence: what to check',
+    description: 'Understand the difference between a licence suspension and loss, and where to find official help.', reading: '5 min read', accent: 'blue', reviewed: '30 October 2026',
+    intro: 'News about an employer’s sponsorship licence can be unsettling. The right next step depends on whether the licence is suspended or lost, whether you are in the UK and your own immigration circumstances.',
+    sections: [
+      { heading: 'If the licence is lost while you are in the UK', body: 'GOV.UK says your Certificate of Sponsorship will be cancelled and your visa limited to 60 days, or the time remaining if less. You must leave your job and leave the UK unless you make a new visa application within the applicable time. If you were involved in the reasons for the licence loss, GOV.UK says your visa will be withdrawn and you will have to leave immediately. Check any UKVI notice and get regulated advice promptly; do not assume when a deadline starts or that a new application will succeed.' },
+      { heading: 'A suspension is different', body: 'According to GOV.UK, if a sponsor’s licence is suspended, someone already working can keep working, and someone who has travelled to the UK but not started work can start. An application to extend will not be processed until the suspension ends. This is not the same as a lost licence; read the official guidance and contact UKVI or a qualified adviser if uncertain.' },
+      { heading: 'If you are outside the UK', body: 'GOV.UK says that if the licence is lost, an application will be refused; a person with a visa who has not yet travelled will have their visa cancelled and will not be allowed to enter. If the licence is suspended, an application is put on hold and UKVI will contact people who have a visa but have not travelled. Check the current official register and guidance before travel.' },
+      { heading: 'Takeovers and non-renewal', body: 'GOV.UK describes a 60-day limitation, or less if less permission remains, if a sponsor does not renew its licence or a new employer does not apply for a sponsor licence within 28 days after a takeover. The outcome depends on your circumstances. A missing match in a third-party directory is not proof a licence has been revoked; check with UKVI and seek advice.' },
+    ], takeaway: 'Read any UKVI correspondence carefully, check the official guidance and speak to a regulated immigration adviser promptly.',
+    sources: [{ label: 'GOV.UK: if your visa sponsor loses their licence', url: 'https://www.gov.uk/employee-lose-sponsor-licence' }, { label: 'GOV.UK: register of licensed sponsors', url: 'https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers' }, { label: 'GOV.UK: find an immigration adviser', url: 'https://www.gov.uk/find-an-immigration-adviser' }],
+  },
   {
     slug: 'a-smarter-scottish-job-search', category: 'Job search', title: 'A smarter way to start your Scottish job search',
     description: 'Turn a broad search into a manageable plan, one meaningful step at a time.', reading: '4 min read', accent: 'blue',
