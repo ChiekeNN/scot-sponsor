@@ -5,8 +5,20 @@ const publicKey = process.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_2Cgs8Bfr
 const base = 'https://api.company-information.service.gov.uk';
 const respond = (res, status, data) => { res.statusCode = status; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('Cache-Control', 'private, no-store'); res.end(JSON.stringify(data)); };
 
+// Never log or return the API key, request headers or upstream response body.
+function upstreamError(res, status) {
+  const reference = Number.isInteger(status) && status >= 100 && status <= 599 ? `CH-${status}` : 'CH-UNKNOWN';
+  console.error('Companies House request failed:', reference);
+  if (status === 401 || status === 403) return respond(res, 502, { error: `Companies House rejected the connection (${reference}). The site administrator should check the live REST API key and its restrictions.`, code: reference });
+  if (status === 429) return respond(res, 429, { error: 'Companies House is busy. Please try again later.', code: reference });
+  if (status >= 500) return respond(res, 502, { error: `Companies House is temporarily unavailable (${reference}). Please try again later.`, code: reference });
+  return respond(res, 502, { error: `Companies House returned an unexpected response (${reference}). Please contact the site administrator.`, code: reference });
+}
+
 // Dependencies are injectable so access control and third-party responses can be tested offline.
 export function makeCompanyHealthHandler({ create = createClient, request = fetch, apiKey = process.env.COMPANIES_HOUSE_API_KEY } = {}) {
+  // A copied Vercel value can include an accidental trailing newline or space.
+  const key = typeof apiKey === 'string' ? apiKey.trim() : '';
   return async function handler(req, res) {
     if (req.method !== 'GET') return respond(res, 405, { error: 'Method not allowed.' });
     const token = /^Bearer\s+(.+)$/i.exec(req.headers.authorization || '')?.[1];
@@ -18,21 +30,21 @@ export function makeCompanyHealthHandler({ create = createClient, request = fetc
       const { data: entitled, error: accessError } = await client.rpc('can_access_job_hunt');
       if (accessError) return respond(res, 503, { error: 'Could not verify membership.' });
       if (!entitled) return respond(res, 403, { error: 'An active Job Hunt Pass or super-admin access is required.' });
-      if (!apiKey) return respond(res, 503, { error: 'Companies House is not configured yet.' });
+      if (!key) return respond(res, 503, { error: 'Companies House is not configured yet.', code: 'CH-NOT-CONFIGURED' });
       const url = new URL(req.url || '/', 'http://local');
       const search = url.searchParams.get('search')?.trim();
       const number = url.searchParams.get('number')?.trim().toUpperCase();
       if ((!search && !number) || (search && number) || (search && (search.length < 2 || search.length > 150)) || (number && !/^[A-Z0-9]{8}$/.test(number))) return respond(res, 400, { error: 'Enter a company name or valid company number.' });
-      const get = async path => request(`${base}${path}`, { headers: { Authorization: `Basic ${Buffer.from(`${apiKey}:`).toString('base64')}`, Accept: 'application/json' }, signal: AbortSignal.timeout(10000) });
+      const get = async path => request(`${base}${path}`, { headers: { Authorization: `Basic ${Buffer.from(`${key}:`).toString('base64')}`, Accept: 'application/json' }, signal: AbortSignal.timeout(10000) });
       if (search) {
         const response = await get(`/search/companies?q=${encodeURIComponent(search)}&items_per_page=10`);
-        if (!response.ok) return respond(res, response.status === 429 ? 429 : 502, { error: response.status === 429 ? 'Companies House is busy. Try again later.' : 'Companies House search is unavailable.' });
+        if (!response.ok) return upstreamError(res, response.status);
         const json = await response.json();
         return respond(res, 200, { items: (json.items || []).map(item => ({ number: item.company_number, name: item.title, status: item.company_status, address: item.address_snippet, date: item.date_of_creation })).filter(item => /^[A-Z0-9]{8}$/.test(item.number || '')) });
       }
       const response = await get(`/company/${number}`);
       if (response.status === 404) return respond(res, 404, { error: 'Company not found.' });
-      if (!response.ok) return respond(res, response.status === 429 ? 429 : 502, { error: 'Companies House profile is unavailable.' });
+      if (!response.ok) return upstreamError(res, response.status);
       const profile = await response.json();
       let charges = null;
       if (profile.has_charges === false) charges = { outstanding: 0, partSatisfied: 0 };

@@ -31,3 +31,36 @@ test('unavailable charges are not misreported as zero', async () => {
  const result=await run(makeCompanyHealthHandler({create:client(),request,apiKey:'dummy'}),'/?number=12345678');
  assert.equal(result.statusCode,200); assert.equal(result.body.charges,null);
 });
+
+test('Companies House authentication errors are identified without exposing keys or headers', async () => {
+ const secret = 'example-key'; let sentAuth;
+ const request = async (_url, opts) => { sentAuth = opts.headers.Authorization; return { ok: false, status: 401 }; };
+ const handler = makeCompanyHealthHandler({ create: client(), request, apiKey: `  ${secret}\n` });
+ const result = await run(handler, '/?search=Edinburgh');
+ assert.equal(result.statusCode, 502);
+ assert.equal(result.body.code, 'CH-401');
+ assert.match(result.body.error, /rejected the connection/);
+ assert.equal(sentAuth, `Basic ${Buffer.from(`${secret}:`).toString('base64')}`);
+ assert.doesNotMatch(JSON.stringify(result.body), /example-key|Basic|Authorization/);
+});
+
+test('upstream failures and absent keys are clearly distinguishable', async () => {
+ for (const [status, expected, code] of [[403, 502, 'CH-403'], [429, 429, 'CH-429'], [503, 502, 'CH-503'], [404, 502, 'CH-404']]) {
+   const handler = makeCompanyHealthHandler({ create: client(), request: async () => ({ ok: false, status }), apiKey: 'dummy' });
+   const result = await run(handler, '/?search=Glasgow');
+   assert.equal(result.statusCode, expected); assert.equal(result.body.code, code);
+ }
+ const noKey = makeCompanyHealthHandler({ create: client(), request: async () => { throw new Error('must not call'); }, apiKey: ' \n ' });
+ const result = await run(noKey, '/?search=Glasgow');
+ assert.equal(result.statusCode, 503); assert.equal(result.body.code, 'CH-NOT-CONFIGURED');
+});
+
+test('search returns Companies House matches using an encoded name', async () => {
+ let seenUrl;
+ const request = async url => { seenUrl = url; return { ok: true, status: 200, json: async () => ({ items: [{ company_number: 'SC123456', title: 'Example & Co', company_status: 'active', address_snippet: 'Edinburgh' }] }) }; };
+ const handler = makeCompanyHealthHandler({ create: client(), request, apiKey: 'dummy' });
+ const result = await run(handler, '/?search=Example%20%26%20Co');
+ assert.equal(result.statusCode, 200);
+ assert.match(seenUrl, /q=Example%20%26%20Co/);
+ assert.deepEqual(result.body.items, [{ number: 'SC123456', name: 'Example & Co', status: 'active', address: 'Edinburgh' }]);
+});
