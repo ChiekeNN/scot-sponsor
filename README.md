@@ -15,7 +15,7 @@ Open the URL printed by Vite. For a production build, run `npm run build`; `npm 
 
 ## What works
 
-- Visitors first see a public homepage with an introduction, product information and planned pricing. They can explore the dashboard and tools in an explicitly labelled demo without an account.
+- Visitors first see a public homepage with an introduction, product information, planned pricing and an interactive sponsor-insights section. The insights are transcribed from the supplied “Scotland Licensed Visa Sponsors – Directory & Industry Breakdown” PDF, not a live register. Its snapshot date, filtering and classification methodology are not specified. A licensed sponsor may not sponsor a particular vacancy; check the official UKVI register and ask the employer. They can explore the dashboard and tools in an explicitly labelled demo without an account.
 - Sign-in and membership prompts describe planned functionality; no credentials or payment information are collected. Alert and membership actions surface the planned subscription options, but do **not** grant paid access.
 
 - Search example jobs by title, company, location, category or tag.
