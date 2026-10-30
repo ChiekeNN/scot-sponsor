@@ -1,56 +1,41 @@
-# ScotSponsor (scotsponsor.co.uk)
-**Verified Scottish Tier-2 & Skilled Worker Visa Job Broadcaster**
+# ScotSponsor
 
-A production-ready React + TypeScript web application engineered to hit **£1,500 – £3,000+ monthly cash flow** by solving the acute visa sponsorship search problem for international university graduates in Scotland.
+A Scotland-focused job discovery prototype, based on the ScotSponsor development brief. It is a React, TypeScript and Vite application that runs locally without accounts or external services.
 
----
+## Run locally
 
-### Features Built In
+Requires Node.js 18+ (Node 20 LTS recommended).
 
-1. **UKVI Home Office Register Verification:**
-   - Real-time badge indicators: `Confirmed Sponsorship (Green)`, `General Sponsor (Yellow)`, and `Explicitly Blocked (Red)` for jobs containing *"Must have Right to Work"* clauses.
-2. **2024–2026 Salary Rule Checker:**
-   - Automatically checks jobs against the standard £38,700 threshold and the 70% discounted **New Entrant (~£30,960)** threshold for recent graduates.
-3. **High-Converting 3-Tier Monetization Model:**
-   - **Quarterly Job Hunt Pass (£24.99 one-off / 90 days):** The primary cash engine.
-   - **Monthly Alert Pass (£9.99/mo recurring):** Low-barrier entry point.
-   - **The Scottish Visa Switching Kit (£19.00 order bump):** 1-click high-margin upsell for instant downloadable scripts and sponsor spreadsheets.
-4. **Interactive Audit Modal:**
-   - Displays official Home Office license rating, mapped SOC codes, and legal route eligibility.
-5. **Real-time Alert Engine Interface:**
-   - Instant Telegram & WhatsApp webhook simulation to demonstrate 2-minute alert delivery.
+```bash
+npm install
+npm run dev
+```
 
----
+Open the URL printed by Vite. For a production build, run `npm run build`; `npm run preview` serves that build locally.
 
-### Quick Start in VS Code
+## What works
 
-1. Unzip `scotsponsor-react-app.zip` into your preferred project directory.
-2. Open the folder in **Visual Studio Code**:
-   ```bash
-   code .
-   ```
-3. Install dependencies:
-   ```bash
-   npm install
-   ```
-4. Start the local Vite development server:
-   ```bash
-   npm run dev
-   ```
-5. Open `http://localhost:5173` in your browser.
+- Search example jobs by title, company, location, category or tag.
+- Filter by location, category and the sponsorship language in a listing; sort by newest or minimum salary.
+- Open job details and save/remove jobs. Saved IDs are stored in the browser's local storage on that device; clearing browser data removes them.
+- Read a practical guide linking to official UK government sources.
+- View the proposed products and prices, and preview the alerts interface.
+- Responsive layout for mobile and desktop.
 
----
+## Important limitations
 
-### Deployment to Vercel (scotsponsor.co.uk)
+**This is a prototype, not a live job board.** All six jobs and employers in `src/App.tsx` are fictional. Posting times and salaries are illustrative, not live data. Sponsorship labels demonstrate how language in a job description might be shown; they are not UKVI verification, a certificate of sponsorship or a determination of visa eligibility. The app deliberately does not claim that a licensed sponsor will sponsor a specific role. Salary alone cannot establish Skilled Worker eligibility: occupation codes, going rates, individual circumstances and current rules matter.
 
-1. Push this folder to a GitHub repository:
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial ScotSponsor release"
-   git branch -M main
-   git remote add origin https://github.com/<your-username>/scotsponsor.git
-   git push -u origin main
-   ```
-2. Import the project in [Vercel](https://vercel.com).
-3. Connect your domain **`scotsponsor.co.uk`** in the Vercel Project Domains settings.
+There is no backend, authentication, live job feed, sponsor-register sync, SOC matching, automated notifications, checkout, paid access, or downloadable kit. The alert form is a UI preview only: the email is neither saved nor sent. Pricing is a roadmap, not an operational checkout. Do not advertise this prototype as a verified or production-ready service.
+
+## Path to production
+
+1. Obtain permission and API credentials for job sources; ingest and deduplicate jobs with source URLs, timestamps and expiry handling.
+2. Import the current official register on a schedule. Store provenance and last-checked dates; reconcile employer names with reviewable confidence scores. A register match must not be presented as proof that a specific job sponsors.
+3. Store jobs, sponsors and user preferences in a database; add authentication, access controls and a privacy policy. Use server-side secrets and row-level security where appropriate.
+4. Classify explicit sponsorship language conservatively; make ambiguous results visible for review. Maintain current occupation and salary rules with qualified legal review, and link to official guidance rather than making individual eligibility decisions.
+5. Add Stripe Checkout and verified webhooks for subscription entitlements, cancellations and one-off purchases. Do not trust client-side payment state.
+6. Connect opt-in notifications via Telegram or another provider, with unsubscribe, delivery retries, rate limits and monitoring. Only promise delivery times that the system actually meets.
+7. Add automated tests, accessibility checks, analytics with consent, error monitoring and deployment configuration before launch.
+
+The app is independent and is not affiliated with the UK Home Office. It does not provide immigration advice.
