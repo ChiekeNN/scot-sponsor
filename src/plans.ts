@@ -1,0 +1,29 @@
+/** Planned offerings. Keep descriptions consistent across the public site and app. */
+export const plans = {
+  monthly: {
+    name: 'Monthly Alert Pass',
+    price: '£9.99',
+    period: '/ month',
+    description: 'A flexible way to keep your job search moving.',
+    features: [
+      'Email alerts for new jobs matching your role and location',
+      'Full job listings and direct application links',
+      'Sponsor information and job wording where available',
+      'Use the free saved jobs and application tracker',
+    ],
+    terms: 'Renews monthly. Cancel before your next renewal.',
+  },
+  jobHunt: {
+    name: 'Job Hunt Pass',
+    price: '£24.99',
+    period: '/ one-off',
+    description: 'One payment, with more time to focus on your search.',
+    features: [
+      'Everything in the Monthly Alert Pass for 90 days',
+      'Email alerts matched to your role and location',
+      'Job-search checklist and employer outreach templates',
+      'Full listings, direct links and sponsor information where available',
+    ],
+    terms: '90 days of access. No automatic renewal.',
+  },
+} as const;
