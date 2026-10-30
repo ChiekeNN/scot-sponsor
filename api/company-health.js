@@ -15,9 +15,9 @@ export function makeCompanyHealthHandler({ create = createClient, request = fetc
       const client = create(projectUrl, publicKey, { global: { headers: { Authorization: `Bearer ${token}` } }, auth: { persistSession: false, autoRefreshToken: false } });
       const { data: identity, error: identityError } = await client.auth.getUser(token);
       if (identityError || !identity?.user) return respond(res, 401, { error: 'Sign in to continue.' });
-      const { data: entitled, error: accessError } = await client.rpc('has_job_hunt_pass');
+      const { data: entitled, error: accessError } = await client.rpc('can_access_job_hunt');
       if (accessError) return respond(res, 503, { error: 'Could not verify membership.' });
-      if (!entitled) return respond(res, 403, { error: 'An active Job Hunt Pass is required.' });
+      if (!entitled) return respond(res, 403, { error: 'An active Job Hunt Pass or super-admin access is required.' });
       if (!apiKey) return respond(res, 503, { error: 'Companies House is not configured yet.' });
       const url = new URL(req.url || '/', 'http://local');
       const search = url.searchParams.get('search')?.trim();
