@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { HomePage, ToolsPage, TrackerPage, InstallCard } from './Features';
 import { PublicLanding, AccessModal } from './Landing';
 import { plans } from './plans';
-import { Home, Calculator, ClipboardList, ArrowDownUp, ArrowLeft, ArrowRight, ArrowUpRight, BadgeCheck, Bell, Bookmark, Briefcase, Building2, Check, CheckCircle2, ChevronDown, ChevronRight, HelpCircle, Clock3, ExternalLink, Filter, GraduationCap, Heart, Info, LayoutDashboard, MapPin, Menu, Search, ShieldCheck, SlidersHorizontal, Sparkles, X } from 'lucide-react';
+import { CvStudio } from './CvStudio';
+import { FileText, Home, Calculator, ClipboardList, ArrowDownUp, ArrowLeft, ArrowRight, ArrowUpRight, BadgeCheck, Bell, Bookmark, Briefcase, Building2, Check, CheckCircle2, ChevronDown, ChevronRight, HelpCircle, Clock3, ExternalLink, Filter, GraduationCap, Heart, Info, LayoutDashboard, MapPin, Menu, Search, ShieldCheck, SlidersHorizontal, Sparkles, X } from 'lucide-react';
 
 type Status = 'confirmed' | 'possible' | 'blocked';
 type Job = { id: number; title: string; company: string; initial: string; color: string; location: string; area: string; salary: string; salaryValue: number; type: string; status: Status; category: string; posted: string; description: string; tags: string[] };
@@ -31,7 +32,7 @@ function App() {
   const [status, setStatus] = useState('All sponsorship');
   const [sort, setSort] = useState('Newest first');
   const [saved, setSaved] = useState<number[]>(readSaved);
-  const [page, setPage] = useState<'home' | 'jobs' | 'saved' | 'guide' | 'plans' | 'tools' | 'tracker'>('home');
+  const [page, setPage] = useState<'home' | 'jobs' | 'saved' | 'guide' | 'plans' | 'tools' | 'tracker' | 'cv'>('home');
   const [selected, setSelected] = useState<Job | null>(null);
   const [modal, setModal] = useState<'alerts' | 'about' | null>(null);
   const [alertEmail, setAlertEmail] = useState('');
@@ -61,6 +62,7 @@ function App() {
         <button className={page === 'guide' ? 'active' : ''} onClick={() => navigate('guide')}><GraduationCap size={19}/> Visa resources</button>
         <button className={page === 'tools' ? 'active' : ''} onClick={() => navigate('tools')}><Calculator size={18}/> Calculators</button>
         <button className={page === 'tracker' ? 'active' : ''} onClick={() => navigate('tracker')}><ClipboardList size={18}/> Application tracker</button>
+        <button className={page === 'cv' ? 'active' : ''} onClick={() => navigate('cv')}><FileText size={18}/> CV studio <span className="premium-label">PREVIEW</span></button>
       </nav>
       <div className="side-label second">YOUR ACCOUNT</div>
       <nav className="side-nav" aria-label="Account navigation">
@@ -71,9 +73,9 @@ function App() {
     </aside>
     {mobileMenu && <button className="mobile-overlay" onClick={() => setMobileMenu(false)} aria-label="Close menu"/>}
     <div className="main-area">
-      <header className="topbar"><button className="menu-button" onClick={() => setMobileMenu(true)} aria-label="Open menu"><Menu size={21}/></button><div className="breadcrumb">Discover <ChevronRight size={14}/> <strong>{page === 'home' ? 'Home' : page === 'jobs' ? 'Explore jobs' : page === 'saved' ? 'Saved jobs' : page === 'guide' ? 'Visa resources' : page === 'tools' ? 'Calculators' : page === 'tracker' ? 'Application tracker' : 'Plans & pricing'}</strong></div><div className="top-actions"><button className="back-to-website" onClick={openLanding}>Website home</button><span className="demo-pill"><span/> DEMO WORKSPACE</span><button className="icon-button top-bell" onClick={() => setAccessModal('membership')} aria-label="Job alerts"><Bell size={19}/></button><button className="avatar" onClick={() => setAccessModal('signin')} aria-label="Sign in">S</button></div></header>
+      <header className="topbar"><button className="menu-button" onClick={() => setMobileMenu(true)} aria-label="Open menu"><Menu size={21}/></button><div className="breadcrumb">Discover <ChevronRight size={14}/> <strong>{page === 'home' ? 'Home' : page === 'jobs' ? 'Explore jobs' : page === 'saved' ? 'Saved jobs' : page === 'guide' ? 'Visa resources' : page === 'tools' ? 'Calculators' : page === 'tracker' ? 'Application tracker' : page === 'cv' ? 'CV studio' : 'Plans & pricing'}</strong></div><div className="top-actions"><button className="back-to-website" onClick={openLanding}>Website home</button><span className="demo-pill"><span/> DEMO WORKSPACE</span><button className="icon-button top-bell" onClick={() => setAccessModal('membership')} aria-label="Job alerts"><Bell size={19}/></button><button className="avatar" onClick={() => setAccessModal('signin')} aria-label="Sign in">S</button></div></header>
       <main className="content">
-        {page === 'home' ? <HomePage navigate={navigate} savedCount={saved.length}/> : page === 'tools' ? <ToolsPage/> : page === 'tracker' ? <TrackerPage/> : isListings ? <>
+        {page === 'home' ? <HomePage navigate={navigate} savedCount={saved.length}/> : page === 'tools' ? <ToolsPage/> : page === 'tracker' ? <TrackerPage/> : page === 'cv' ? <CvStudio/> : isListings ? <>
           <section className="hero"><div className="hero-content"><div className="eyebrow"><span className="eyebrow-dot"/> YOUR NEXT CHAPTER STARTS HERE</div><h1>{page === 'saved' ? <>Your opportunities,<br/><em>all in one place.</em></> : <>A brighter career<br/><em>starts in Scotland.</em></>}</h1><p>{page === 'saved' ? 'Keep track of the roles that caught your eye and come back whenever you’re ready.' : 'Discover opportunities, understand sponsorship, and take the next step with a little more confidence.'}</p><div className="hero-foot"><span className="hero-saltire" aria-hidden="true"><span className="saltire"/></span><span>Made for your future in Scotland</span></div></div><div className="hero-art" aria-hidden="true"><div className="art-label"><span>✦</span> MADE IN SCOTLAND, FOR YOUR FUTURE</div></div></section>
           <div className="demo-notice"><Info size={17}/><span><strong>You're exploring a demo.</strong> These are illustrative jobs, not live or verified listings. <button onClick={() => setModal('about')}>Learn more</button></span></div>
           <section className="intro-row"><div><div className="section-kicker">OPPORTUNITIES ACROSS SCOTLAND <span>✳</span></div><h2>{page === 'saved' ? 'Your saved jobs' : 'Find your place in Scotland'}</h2><p>{page === 'saved' ? 'Your shortlist is saved on this device.' : 'From the Central Belt to the Highlands, find your next opportunity.'}</p></div><button className="outline-button alerts-button" onClick={() => setAccessModal('membership')}><Bell size={16}/> Set up job alerts</button></section>

@@ -21,6 +21,8 @@ export const plans = {
     features: [
       'Everything in the Monthly Alert Pass for 90 days',
       'Email alerts matched to your role and location',
+      'Professional CV builder with print-to-PDF and text download',
+      'ATS-style CV keyword review against a job description',
       'Job-search checklist and employer outreach templates',
       'Full listings, direct links and sponsor information where available',
     ],
