@@ -30,6 +30,8 @@ test('company check opens the selected sponsor, automatically loads an exact mat
     let rendered = JSON.stringify(view.toJSON());
     assert.match(rendered,/023 LTD/); assert.match(rendered,/Edinburgh/); assert.match(rendered,/Scotland/);
     assert.match(rendered,/25-29 Clerk Street/); assert.match(rendered,/do not prove/);
+    assert.doesNotMatch(rendered, /Search the official Companies House register separately/);
+    assert.match(rendered, /https:\/\/find-and-update\.company-information\.service\.gov\.uk\/company\/SC699219/);
     assert.equal(view.root.findAllByType('input').length,0);
     await act(async () => view.unmount());
 
@@ -45,6 +47,7 @@ test('company check opens the selected sponsor, automatically loads an exact mat
     await act(async () => { view = create(React.createElement(CompanyHealth, { sponsor:row, onClose:()=>{} })); });
     rendered = JSON.stringify(view.toJSON());
     assert.match(rendered,/registered office can differ/); assert.match(rendered,/does not mean the employer is illegitimate/);
+    assert.doesNotMatch(rendered, /Search the official Companies House register separately/);
     await act(async () => view.unmount());
 
     const directory = await readFile('src/SponsorDirectory.tsx','utf8');
