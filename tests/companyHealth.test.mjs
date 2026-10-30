@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { makeCompanyHealthHandler } from '../api/company-health.js';
 
-const client = ({ user = true, pass = true } = {}) => () => ({ auth: { getUser: async () => ({ data: { user: user ? {} : null }, error: null }) }, rpc: async () => ({ data: pass, error: null }) });
+const client = ({ user = true, pass = true } = {}) => () => ({ auth: { getUser: async () => ({ data: { user: user ? {} : null }, error: null }) }, rpc: async (name) => { assert.equal(name, 'can_access_job_hunt'); return { data: pass, error: null }; } });
 const run = async (handler, url, token = 'test-token') => { const result = { headers: {}, setHeader(k,v) { this.headers[k]=v; }, end(v) { this.body=JSON.parse(v); } }; await handler({ method:'GET', url, headers: token ? { authorization:`Bearer ${token}` } : {} }, result); return result; };
 
 test('company health is denied without a session or an active Job Hunt Pass', async () => {
@@ -16,7 +16,7 @@ test('company health is denied without a session or an active Job Hunt Pass', as
  assert.equal(requests,0);
 });
 
-test('company data comes from an explicit company number and charges are counted by status', async () => {
+test('company data comes from an authorised account and explicit company number, and charges are counted by status', async () => {
  const request = async url => ({ok:true,status:200,json:async()=>url.includes('/charges') ? { total_count:3, items:[{status:'outstanding'},{status:'part-satisfied'},{status:'satisfied'}] } : { company_number:'SC123456', company_name:'EXAMPLE LTD', company_status:'active', date_of_creation:'2010-01-01', sic_codes:['62020'], has_charges:true }});
  const handler=makeCompanyHealthHandler({create:client(),request,apiKey:'dummy'});
  const result=await run(handler,'/?number=SC123456');
