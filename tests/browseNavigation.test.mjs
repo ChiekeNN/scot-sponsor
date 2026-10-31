@@ -16,8 +16,8 @@ test('browse links require membership; filtered feed and history work for member
   globalThis.window={setInterval,clearInterval,get location(){return location},history:{pushState(_a,_b,url){update(url)},replaceState(_a,_b,url){update(url)}},addEventListener(name,cb){handlers[name]=cb},removeEventListener(name){delete handlers[name]},scrollTo(){},requestAnimationFrame(cb){cb();return 1},cancelAnimationFrame(){}};
   globalThis.document={getElementById(){return {scrollIntoView(){scrolled++},focus(){focus++}}}};
   globalThis.localStorage={getItem(){return null},setItem(){}};
-  let currentSession=null;let memberAccess=true;let jobHuntAccess=true;
-  globalThis.__browseAuth={rpc:async(name)=>({data:name==='can_access_member_insights'?memberAccess:name==='can_access_job_hunt'?jobHuntAccess:[],error:null}),auth:{getSession:async()=>({data:{session:currentSession}}),onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}})}};
+  let currentSession=null;let memberAccess=true;let jobHuntAccess=true;let authEvent;
+  globalThis.__browseAuth={rpc:async(name)=>({data:name==='can_access_member_insights'?memberAccess:name==='can_access_job_hunt'?jobHuntAccess:[],error:null}),auth:{getSession:async()=>({data:{session:currentSession}}),onAuthStateChange:(cb)=>{authEvent=cb;return {data:{subscription:{unsubscribe(){}}}}}}};
   const noop='import React from "react";export const component=()=>React.createElement("div");';
   const stubs={
    Features:`${noop} export const HomePage=component,ToolsPage=component,TrackerPage=component,InstallCard=component;`,
@@ -49,6 +49,12 @@ test('browse links require membership; filtered feed and history work for member
   update('/?browse=popular&id=developer#scotland-jobs');memberAccess=false;jobHuntAccess=false;
   await act(async()=>{view=create(React.createElement(App))});
   assert.equal(view.root.findAllByProps({id:'live-feed'}).length,0);assert.equal(view.root.findAllByProps({className:'member-gate-shell'}).length,1);
+  await act(async()=>view.unmount());
+  update('/#guide-a-smarter-scottish-job-search');memberAccess=true;jobHuntAccess=true;
+  await act(async()=>{view=create(React.createElement(App))});
+  assert.equal(view.root.findAllByProps({id:'browse-go'}).length,1,'signed-in visitor can open a public guide link');
+  await act(async()=>authEvent('SIGNED_IN',currentSession));
+  assert.equal(view.root.findAllByProps({id:'browse-go'}).length,1,'auth refresh does not hide the public guide');
   await act(async()=>view.unmount());
  }finally{delete globalThis.__browseAuth;for(const [key,value] of Object.entries(old)){if(value===undefined)delete globalThis[key];else globalThis[key]=value}await rm(dir,{recursive:true,force:true})}
 });
