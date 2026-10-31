@@ -10,9 +10,10 @@ test('retired providers cannot be re-imported and historical submissions remain'
  assert.match(sql,/listing_fingerprint=public.job_listing_fingerprint/);
  assert.match(sql,/d.updated_at>=now\(\)-interval '7 days'/);
 });
-test('job details omit source and editor controls without weakening complete-only protection',async()=>{
+test('job details omit source controls and restrict editor to admins without weakening complete-only protection',async()=>{
  const ui=await readFile('src/JobDetails.tsx','utf8');
- assert.doesNotMatch(ui,/Source: myjobscotland|Data reuse information|View the original listing and attachments|Super-admin: add or update full description/);
+ assert.doesNotMatch(ui,/Source: myjobscotland|Data reuse information|View the original listing and attachments/);
+ assert.match(ui,/isAdmin&&detail.full_description&&<FullDescriptionEditor/);
  assert.match(ui,/full_description/);
  const sql=await readFile('supabase/migrations/20261101072000_remove_job_detail_source_url.sql','utf8');
  assert.doesNotMatch(sql,/'source_url'/);assert.match(sql,/listing_fingerprint=public.job_listing_fingerprint/);assert.match(sql,/d.updated_at>=now\(\)-interval '7 days'/);

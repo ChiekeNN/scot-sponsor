@@ -9,19 +9,20 @@ type Feed = { unread: number; items: Notice[]; monitor: { last_checked: string |
 const dateTime = (value: string | null) => value ? new Date(value).toLocaleString('en-GB', { dateStyle:'medium', timeStyle:'short' }) : 'Not yet';
 
 export function useAdminAlerts(session: Session | null) {
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminUserId, setAdminUserId] = useState<string | null>(null);
+  const isAdmin = !!session && adminUserId === session.user.id;
   const [feed, setFeed] = useState<Feed | null>(null);
   const [error, setError] = useState(false);
   useEffect(() => {
     let active = true;
-    setIsAdmin(false); setFeed(null); setError(false);
+    setAdminUserId(null); setFeed(null); setError(false);
     if (!session || !directoryClient) return () => { active = false; };
     const load = async () => {
       const admin = await directoryClient!.rpc('is_super_admin');
       if (!active) return;
-      if (admin.error) { setError(true); return; }
-      if (admin.data !== true) { setIsAdmin(false); setFeed(null); return; }
-      setIsAdmin(true);
+      if (admin.error) { setAdminUserId(null); setFeed(null); setError(true); return; }
+      if (admin.data !== true) { setAdminUserId(null); setFeed(null); return; }
+      setAdminUserId(session.user.id);
       const result = await directoryClient!.rpc('admin_notification_feed');
       if (!active) return;
       if (result.error) setError(true);
