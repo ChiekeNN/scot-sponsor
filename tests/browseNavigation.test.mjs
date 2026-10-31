@@ -11,9 +11,9 @@ test('browse links work for guests and members; history and access gates remain 
  const old={window:globalThis.window,document:globalThis.document,localStorage:globalThis.localStorage};
  const cache=join(process.cwd(),'node_modules','.cache');await mkdir(cache,{recursive:true});const dir=await mkdtemp(join(cache,'browse-route-'));
  try{
-  let location=new URL('https://example.test/');const handlers={};let focus=0,scrolled=0;
+  let location=new URL('https://example.test/');const handlers={};let focus=0,scrolled=0,delayedFrame=null,deferFrame=false;
   const update=url=>{location=new URL(url,location.href)};
-  globalThis.window={setInterval,clearInterval,get location(){return location},history:{pushState(_a,_b,url){update(url)},replaceState(_a,_b,url){update(url)}},addEventListener(name,cb){handlers[name]=cb},removeEventListener(name){delete handlers[name]},scrollTo(){},requestAnimationFrame(cb){cb();return 1},cancelAnimationFrame(){}};
+  globalThis.window={setInterval,clearInterval,get location(){return location},history:{pushState(_a,_b,url){update(url)},replaceState(_a,_b,url){update(url)}},addEventListener(name,cb){handlers[name]=cb},removeEventListener(name){delete handlers[name]},scrollTo(){},requestAnimationFrame(cb){if(deferFrame)delayedFrame=cb;else cb();return 1},cancelAnimationFrame(){delayedFrame=null}};
   globalThis.document={getElementById(){return {scrollIntoView(){scrolled++},focus(){focus++}}}};
   globalThis.localStorage={getItem(){return null},setItem(){}};
   let currentSession=null;let memberAccess=true;let jobHuntAccess=true;let authEvent;
@@ -38,6 +38,25 @@ test('browse links work for guests and members; history and access gates remain 
   await act(async()=>view.root.findByProps({id:'browse-go'}).props.onClick());
   assert.equal(location.search,'?browse=industry&id=engineering');assert.equal(view.root.findByProps({id:'live-feed'}).children[0],'industry/engineering');
   assert.equal(view.root.findAllByProps({className:'member-gate-shell'}).length,0);
+  // Native fragment navigation can emit popstate while retaining the browse query.
+  // Every menu destination must remain free to scroll without jumping to jobs.
+  const originalScrolls=scrolled, originalFocus=focus;
+  for(const hash of ['#browse-jobs','#how-it-works','#features','#sponsor-insights','#journal','#guide-a-smarter-scottish-job-search','#membership','#top']){
+   update(`/?browse=industry&id=engineering${hash}`);await act(async()=>handlers.popstate());
+   assert.equal(scrolled,originalScrolls,`did not jump to jobs for ${hash}`);
+   assert.equal(focus,originalFocus,`did not steal focus for ${hash}`);
+   assert.equal(view.root.findByProps({id:'live-feed'}).children[0],'industry/engineering');
+  }
+  update('/?browse=industry&id=engineering#scotland-jobs');await act(async()=>handlers.popstate());
+  assert.equal(scrolled,originalScrolls+1,'back/forward to the filtered feed scrolls to jobs');
+  // A pending scroll must not pull a visitor back after they choose another menu.
+  deferFrame=true;
+  await act(async()=>view.root.findByProps({id:'browse-go'}).props.onClick());
+  assert.ok(delayedFrame);
+  update('/?browse=industry&id=engineering#features');
+  delayedFrame();
+  assert.equal(scrolled,originalScrolls+1,'pending job scroll respects a newer menu destination');
+  deferFrame=false;
   await act(async()=>view.unmount());
   update('/?browse=popular&id=developer#scotland-jobs');currentSession={user:{id:'member'}};
   await act(async()=>{view=create(React.createElement(App))});
@@ -49,6 +68,12 @@ test('browse links work for guests and members; history and access gates remain 
   update('/?browse=popular&id=developer#scotland-jobs');memberAccess=false;jobHuntAccess=false;
   await act(async()=>{view=create(React.createElement(App))});
   assert.equal(view.root.findByProps({id:'live-feed'}).children[0],'popular/developer');assert.equal(view.root.findAllByProps({className:'member-gate-shell'}).length,0);
+  await act(async()=>view.unmount());
+  // A deep link to another section must not be overridden by a saved filter.
+  update('/?browse=industry&id=engineering#membership');memberAccess=false;jobHuntAccess=false;
+  const beforeDeepLink=scrolled;
+  await act(async()=>{view=create(React.createElement(App))});
+  assert.equal(scrolled,beforeDeepLink);assert.equal(view.root.findByProps({id:'live-feed'}).children[0],'industry/engineering');
   await act(async()=>view.unmount());
   update('/#guide-a-smarter-scottish-job-search');memberAccess=true;jobHuntAccess=true;
   await act(async()=>{view=create(React.createElement(App))});
