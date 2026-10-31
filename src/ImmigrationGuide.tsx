@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowUpRight, CheckCircle2, ChevronDown, Compass, ListChecks, ShieldCheck } from 'lucide-react';
+import { ArrowUpRight, CheckCircle2, ChevronDown, Compass, ListChecks } from 'lucide-react';
 
 type Route = { title: string; label: string; summary: string; forWhom: string; checks: string[]; next: string; url: string };
 // Reviewed against the linked GOV.UK overview pages on 31 October 2026.
@@ -29,7 +29,6 @@ export function ImmigrationGuide() {
   return <div className="immigration-resource">
     <section className="immigration-guide" id="immigration-guide" aria-labelledby="immigration-title">
       <div className="resource-heading"><div><div className="public-kicker">A CLEARER WAY FORWARD <span>✳</span></div><h2 id="immigration-title">Your UK immigration<br/><em>guide, made clearer.</em></h2><p>Explore the routes and employer guidance below. Select a topic for key checks and a link to the official guidance. Free to read, no sign-in required.</p></div><div className="resource-emblem" aria-hidden="true"><Compass size={34}/><span>GUIDANCE FOR<br/><strong>YOUR JOURNEY</strong></span></div></div>
-      <div className="resource-notice"><ShieldCheck size={19}/><p><strong>A starting point, not immigration advice.</strong> Rules, fees and individual circumstances change. These summaries were checked against the linked GOV.UK pages on 31 October 2026 and do not update automatically. Check current guidance or <a href="https://www.gov.uk/find-an-immigration-adviser" target="_blank" rel="noopener noreferrer">find a regulated adviser</a>.</p></div>
       <div className="resource-quick-links"><a href="https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers" target="_blank" rel="noopener noreferrer">Official sponsor register <ArrowUpRight size={14}/></a><a href="https://www.gov.uk/check-job-applicant-right-to-work" target="_blank" rel="noopener noreferrer">Employer right-to-work checks <ArrowUpRight size={14}/></a></div>
       <div className="route-grid">{routes.map((route,index)=><details className="route-card" key={route.title}><summary><span className="route-top"><span>{route.label}</span><b>{String(index+1).padStart(2,'0')}</b></span><span className="route-title">{route.title}</span><span className="route-summary">{route.summary}</span><span className="route-expand">Explore this topic <ChevronDown size={16}/></span></summary><div className="route-detail"><h3>Who is it for?</h3><p>{route.forWhom}</p><h3>Things to check</h3><ul>{route.checks.map(item=><li key={item}>{item}</li>)}</ul><h3>Your next step</h3><p>{route.next}</p><a href={route.url} target="_blank" rel="noopener noreferrer">Read GOV.UK guidance <ArrowUpRight size={15}/></a></div></details>)}</div>
     </section>
