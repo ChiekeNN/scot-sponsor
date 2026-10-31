@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, access } from 'node:fs/promises';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import ts from 'typescript';
@@ -35,4 +35,21 @@ test('immigration guides cite the official sources and state when checked', () =
   assert.ok(sponsor.sources.some(s => s.url === 'https://www.gov.uk/employee-lose-sponsor-licence'));
   assert.match(relationship.sections.map(s=>s.body).join(' '), /999/);
   assert.match(sponsor.sections.map(s=>s.body).join(' '), /suspend/i);
+});
+
+
+test('every career guide has a unique, locally hosted photographic cover', async () => {
+  assert.equal(new Set(guides.map(guide => guide.image)).size, guides.length);
+  for (const guide of guides) {
+    assert.match(guide.image, /^\/images\/journal\/[a-z-]+\.jpg$/);
+    const path = new URL(`../public${guide.image}`, import.meta.url);
+    await access(path);
+    const image = await readFile(path);
+    assert.ok(image.length > 1000);
+    assert.equal(image.subarray(0, 3).toString('hex'), 'ffd8ff');
+  }
+  const journal = await readFile(new URL('../src/Journal.tsx', import.meta.url), 'utf8');
+  assert.match(journal, /src=\{guide.image\}/);
+  assert.match(journal, /<Cover guide=\{selected\} featured\/>/);
+  assert.match(journal, /<Cover guide=\{guide\}\/>/);
 });

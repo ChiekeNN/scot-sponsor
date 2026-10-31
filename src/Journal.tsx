@@ -10,7 +10,7 @@ const guideFromHash = () => {
 };
 
 function Cover({ guide, featured = false }: { guide: Guide; featured?: boolean }) {
-  return <div className={`journal-cover ${guide.accent} ${featured ? 'featured' : ''}`} aria-hidden="true"><div className="cover-orbit one"/><div className="cover-orbit two"/><div className="cover-sun"/><div className="cover-shape"/><span className="cover-star">✳</span><span className="cover-caption">SCOTSPONSOR <b> / </b> THE CAREER JOURNAL</span></div>;
+  return <div className={`journal-cover ${guide.accent} ${featured ? 'featured' : ''}`} aria-hidden="true"><img className="journal-cover-image" src={guide.image} alt="" loading={featured ? 'eager' : 'lazy'} decoding="async"/><div className="journal-cover-shade"/><span className="cover-star">✳</span><span className="cover-caption">SCOTSPONSOR <b> / </b> THE CAREER JOURNAL</span></div>;
 }
 
 export function Journal() {
