@@ -25,7 +25,7 @@ test('cron requires secret and never reveals it',async()=>{
 test('feed is read-only and support requests stay private',async()=>{
  const sql=await readFile('supabase/migrations/20261030233000_partner_job_feed.sql','utf8');assert.match(sql,/grant select on public.partner_jobs to anon, authenticated/);assert.doesNotMatch(sql,/grant (?:insert|update|all) on public.partner_jobs to anon/);
  const intake=await readFile('supabase/migrations/20261031201500_application_support.sql','utf8');assert.match(intake,/not public.can_access_job_hunt/);assert.match(intake,/not public.is_super_admin/);assert.match(intake,/revoke all on public.application_support_requests from public, anon, authenticated/);assert.match(intake,/90 days/);
- const ui=await readFile('src/ApplicationSupport.tsx','utf8');assert.match(ui,/not an application to the employer/);assert.match(ui,/File uploads are not available/);assert.doesNotMatch(ui,/type="file"/);
+ const ui=await readFile('src/JobDetails.tsx','utf8');assert.doesNotMatch(ui,/ApplicationSupport|request_application_support_for_job/);
  const feed=await readFile('src/PartnerJobs.tsx','utf8');assert.doesNotMatch(feed,/View source &amp; apply/);assert.doesNotMatch(feed,/adzuna/i);assert.match(feed,/public_job_list/);
 });
 test('Adzuna ingestion can import over 500 distinct Scotland jobs',async()=>{

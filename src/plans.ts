@@ -27,7 +27,7 @@ export const plans = {
       'Graduate Visa Switch Planner with a personalised timeline',
       'Search and download the Scottish sponsor directory by industry or location',
       'Job-search checklist and employer outreach templates',
-      'Request personalised application support from ScotSponsor',
+      'Explore detailed job information where available',
     ],
     terms: '90 days of access. No automatic renewal.',
   },
