@@ -16,10 +16,10 @@ test('anonymous visitors can browse, search and read full photographed journal a
   globalThis.document={getElementById(){return {scrollIntoView(){}}}};
   const compile=async(name,ext='tsx')=>{
    let code=(await transformWithEsbuild(await readFile(`src/${name}.${ext}`,'utf8'),`src/${name}.${ext}`,{jsx:'automatic'})).code;
-   for(const dependency of ['plans','guides','Journal','SponsorInsights','JobBrowse']) code=code.replace(`"./${dependency}"`,`"./${dependency}.mjs"`);
+   for(const dependency of ['plans','guides','Journal','SponsorInsights','JobBrowse','ImmigrationGuide','HomeFaq']) code=code.replace(`"./${dependency}"`,`"./${dependency}.mjs"`);
    await writeFile(join(dir,`${name}.mjs`),code);
   };
-  await compile('plans','ts');await compile('guides','ts');await compile('Journal');await compile('Landing');
+  await compile('plans','ts');await compile('guides','ts');await compile('Journal');await compile('ImmigrationGuide');await compile('HomeFaq');await compile('Landing');
   await writeFile(join(dir,'SponsorInsights.mjs'),'import React from "react";export const SponsorInsights=()=>React.createElement("div");');
   await writeFile(join(dir,'JobBrowse.mjs'),'import React from "react";export const JobBrowse=()=>React.createElement("div");');
   const {PublicLanding}=await import(pathToFileURL(join(dir,'Landing.mjs')).href);
