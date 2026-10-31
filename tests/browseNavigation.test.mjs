@@ -25,6 +25,7 @@ test('browse links work for guests and members; history and access gates remain 
    plans:'export const plans={monthly:{name:"monthly",price:"",period:"",description:"",features:[],terms:""},jobHunt:{name:"job",price:"",period:"",description:"",features:[],terms:""}};',
    CvStudio:`${noop} export const CvStudio=component;`,Journal:`${noop} export const Journal=component;`,SponsorDirectory:`${noop} export const SponsorDirectory=component;`,AccountCenter:`${noop} export const AccountCenter=component;`,
    AdminAlerts:`${noop} export const AdminAlerts=component;export const useAdminAlerts=()=>({isAdmin:false,feed:null,error:null,refresh(){}});`,
+   ImmigrationGuide:`${noop} export const ImmigrationGuide=component;`,
    CommunityForum:`${noop} export const CommunityForum=component;`,
    MemberChat:`${noop} export const MemberChat=component;`,ImmigrationInsights:`${noop} export const ImmigrationInsights=component;`,MemberTools:`${noop} export const MemberTools=component;`,
    PartnerJobs:'import React from "react";export const PartnerJobs=({browseSelection,onClearBrowse})=>React.createElement("button",{id:"live-feed",onClick:onClearBrowse},browseSelection?`${browseSelection.kind}/${browseSelection.id}`:"all jobs");',
@@ -42,7 +43,7 @@ test('browse links work for guests and members; history and access gates remain 
   // Native fragment navigation can emit popstate while retaining the browse query.
   // Every menu destination must remain free to scroll without jumping to jobs.
   const originalScrolls=scrolled, originalFocus=focus;
-  for(const hash of ['#browse-jobs','#how-it-works','#features','#sponsor-insights','#journal','#guide-a-smarter-scottish-job-search','#membership','#top']){
+  for(const hash of ['#browse-jobs','#how-it-works','#features','#sponsor-insights','#immigration-guide','#essential-checklists','#faq','#journal','#guide-a-smarter-scottish-job-search','#membership','#top']){
    update(`/?browse=industry&id=engineering${hash}`);await act(async()=>handlers.popstate());
    assert.equal(scrolled,originalScrolls,`did not jump to jobs for ${hash}`);
    assert.equal(focus,originalFocus,`did not steal focus for ${hash}`);
@@ -82,5 +83,12 @@ test('browse links work for guests and members; history and access gates remain 
   await act(async()=>authEvent('SIGNED_IN',currentSession));
   assert.equal(view.root.findAllByProps({id:'browse-go'}).length,1,'auth refresh does not hide the public guide');
   await act(async()=>view.unmount());
+  for(const hash of ['#immigration-guide','#essential-checklists','#faq']) {
+   update('/'+hash); await act(async()=>{view=create(React.createElement(App))});
+   assert.equal(view.root.findAllByProps({id:'browse-go'}).length,1,`${hash} stays public on sign-in`);
+   await act(async()=>authEvent('SIGNED_IN',currentSession));
+   assert.equal(view.root.findAllByProps({id:'browse-go'}).length,1,`${hash} stays public on auth refresh`);
+   await act(async()=>view.unmount());
+  }
  }finally{delete globalThis.__browseAuth;for(const [key,value] of Object.entries(old)){if(value===undefined)delete globalThis[key];else globalThis[key]=value}await rm(dir,{recursive:true,force:true})}
 });
