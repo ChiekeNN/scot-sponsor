@@ -34,6 +34,6 @@ export function makeSyncHandler({env=process.env,request=fetch,create=createClie
   status[source]={ok:false};
  }
  if(Object.values(status).some(s=>s.ok))await client.from('partner_jobs').delete().lt('posted_at',new Date(Date.now()-21*86400000).toISOString());
- return send(res,Object.values(status).every(s=>s.ok)?200:503,{sources:status});
+ return send(res,Object.values(status).every(s=>s.ok)?200:503,{feeds:Object.values(status)});
 }}
 export default makeSyncHandler();

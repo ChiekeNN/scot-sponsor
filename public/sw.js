@@ -1,5 +1,5 @@
-const CACHE = 'scotsponsor-shell-v1';
-const SHELL = ['/', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/scotland-landscape.svg'];
+const CACHE = 'scotsponsor-shell-v2';
+const SHELL = ['/', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/scotland-landscape.svg', '/career-support.jpg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(async cache => {
     // Cache the built entry points too, so the first visit can work offline.
