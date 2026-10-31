@@ -1,0 +1,18 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {transform} from 'esbuild';
+import {parse} from 'node-html-parser';
+import vm from 'node:vm';
+const source=await readFile('supabase/functions/scotland-job-import/index.ts','utf8');
+const isolated=source.replace(/^import[^\n]+\n/gm,'').replace(/const db=createClient[^\n]+\n/,'').split('Deno.serve(')[0]+'\nglobalThis.__test={links,extract,extractDescription};';
+const compiled=(await transform(isolated,{loader:'ts'})).code;
+const context={parse,URL,Date,Set,globalThis:null};context.globalThis=context;vm.runInNewContext(compiled,context);
+const {links,extract}=context.__test;
+const url='https://myjobscotland.gov.uk/councils/highland-council/jobs/example-role-123456';
+const description='The council is looking for a qualified candidate to join our service. '.repeat(4);
+const html=`<html><main><h1>Community Officer</h1><p>Published by Highland Council Ref: ABC123 Published date: 28/10/2026 Closing date: 09/11/2026</p><p>Location: Inverness Salary: £30,000 Contract type: Permanent Position type: Full Time Hours: 35 Categories: Support</p><h2>Job Description</h2><p>${description}</p><h2>Requirements</h2><p>Relevant experience is essential.</p><h2>Job Attachments</h2><p>Attachment</p></main></html>`;
+test('extracts full delimited advert and verified metadata, not attachments',()=>{const job=extract(html,url,Date.parse('2026-10-31T14:00:00Z'));assert.ok(job);assert.equal(job.external_id,'123456');assert.match(job.description,/Relevant experience is essential/);assert.doesNotMatch(job.description,/Attachment/);assert.equal(job.location,'Inverness');assert.equal(job.posted_at,'2026-10-28T00:00:00.000Z')});
+test('rejects missing full advert boundary, closed or non-Scottish results',()=>{assert.equal(extract(html.replace('<h2>Job Attachments</h2>',''),url,Date.parse('2026-10-31T14:00:00Z')),null);assert.equal(extract(html.replace('09/11/2026','01/10/2026'),url,Date.parse('2026-10-31T14:00:00Z')),null);assert.equal(extract(html.replace('Inverness Salary','London, England Salary'),url,Date.parse('2026-10-31T14:00:00Z')),null);assert.equal(extract(html.replace('Inverness Salary','Scotland Gate, Northumberland Salary'),url,Date.parse('2026-10-31T14:00:00Z')),null);assert.equal(extract(html.replace('Inverness Salary','Liverpool Salary'),url,Date.parse('2026-10-31T14:00:00Z')),null);assert.ok(extract(html.replace('28/10/2026','01/01/2026'),url,Date.parse('2026-10-31T14:00:00Z')))});
+test('accepts only council detail links on the fixed source host',()=>{const list=links(`<a href="/councils/highland-council/jobs/example-role-123456">a</a><a href="https://evil.test/councils/highland-council/jobs/example-role-123456">b</a><a href="/search/secret">c</a>`);assert.equal(list.length,1);assert.equal(list[0],url)});
+test('database access, protection and scheduling are service-only',async()=>{const sql=await readFile('supabase/migrations/20261101060000_scottish_job_import.sql','utf8');assert.match(sql,/revoke all on function public\.scotland_job_import_authorise/);assert.match(sql,/partner_detail_exclusions/);assert.match(sql,/origin='provider'/);const cron=await readFile('supabase/migrations/20261101062000_schedule_scottish_jobs.sql','utf8');assert.match(cron,/\*\/3 \* \* \* \*/);assert.match(cron,/vault\.decrypted_secrets/)});

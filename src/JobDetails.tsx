@@ -7,7 +7,7 @@ type Detail={source_url:string|null;id:string;title:string;employer:string;locat
 type Props={id:string;title:string;isAdmin:boolean;onClose:()=>void};
 const text=(s:string)=>s.replace(/\bsponsorship\s+(?:is\s+)?not\s+verified\b/gi,'Please confirm sponsorship arrangements with the employer');
 const money=(v:number)=>new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP',maximumFractionDigits:0}).format(v);
-function salary(d:Detail){const min=d.salary_min,max=d.salary_max;if(min==null&&max==null)return 'Not provided';const value=min!=null&&max!=null?(min===max?money(min):`${money(min)} – ${money(max)}`):min!=null?`From ${money(min)}`:`Up to ${money(max!)}`;return `${value}${d.salary_is_predicted?' · estimate':''} · ${d.salary_period?`per ${d.salary_period}`:'pay period not specified'}`}
+function salary(d:Detail){const min=d.salary_min,max=d.salary_max;if(min==null&&max==null){const supplied=/^Salary:\s*(.+)$/m.exec(d.full_description||'');return supplied?.[1]?.trim()||'Not provided'};const value=min!=null&&max!=null?(min===max?money(min):`${money(min)} – ${money(max)}`):min!=null?`From ${money(min)}`:`Up to ${money(max!)}`;return `${value}${d.salary_is_predicted?' · estimate':''} · ${d.salary_period?`per ${d.salary_period}`:'pay period not specified'}`}
 function label(v:string|null){return v?v.replace(/_/g,' ').replace(/^\w/,c=>c.toUpperCase()):'Not provided'}
 
 function Emphasis({value}:{value:string}){return <>{value.split(/(\*\*[^*\n]+\*\*)/g).map((part,index)=>part.startsWith('**')&&part.endsWith('**')?<strong key={index}>{part.slice(2,-2)}</strong>:part)}</>}
