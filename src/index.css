@@ -103,3 +103,6 @@ body{background:#f5f7f8}
 @media(max-width:900px){.job-browse{margin-left:25px;margin-right:25px;padding:30px}.browse-links{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.job-browse{margin:24px 16px 0;padding:24px 18px}.browse-heading h2{font-size:30px}.browse-heading-icon{width:42px;height:42px}.browse-tabs{display:grid;grid-template-columns:1fr;gap:6px}.browse-tabs button{justify-content:flex-start;min-height:44px}.browse-panel{padding:20px 16px}.browse-panel-heading{align-items:start}.browse-panel-heading>span{display:none}.browse-links{grid-template-columns:1fr;gap:0}.browse-links a{min-height:44px;font-size:12px}.partner-browse-filter{align-items:flex-start;flex-direction:column}}
 @media(prefers-reduced-motion:reduce){.browse-links a svg{transition:none}}
+
+/* Readable, source-preserving job descriptions. */
+.job-detail-description{font-size:13px;line-height:1.8;color:#365b65;overflow-wrap:anywhere}.job-detail-description h4{font-size:14px;color:#244c5b;margin:22px 0 8px}.job-detail-description p{margin:0 0 14px;white-space:pre-wrap}.job-detail-description ul{padding-left:22px;margin:8px 0 18px}.job-detail-description li{padding-left:3px;margin:5px 0;white-space:pre-wrap}.job-detail-description strong{color:#254e5b}.job-detail-facts strong{overflow-wrap:anywhere}

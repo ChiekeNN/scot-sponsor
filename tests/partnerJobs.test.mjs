@@ -9,6 +9,9 @@ const reed={jobId:55,jobTitle:'Engineer',locationName:'Edinburgh, Scotland',date
 test('normalises valid recent Scotland records and excludes uncertain or unsafe data',()=>{
  assert.equal(normaliseJob('adzuna',ad,now).title,'Engineer');assert.equal(normaliseJob('reed',reed,now).source,'reed');
  assert.equal(normaliseJob('reed',{...reed,locationName:'Scotland Gate, Northumberland'},now),null);
+ for(const place of ['Hawick, Scottish Borders','Lerwick, Shetland Islands','Kirkwall, Orkney Islands','Stornoway, Western Isles','Dunbar, East Lothian'])assert.ok(normaliseJob('reed',{...reed,locationName:place},now),place);
+ assert.equal(normaliseJob('reed',{...reed,locationName:'Hamilton, England'},now),null);
+ assert.equal(normaliseJob('reed',{...reed,locationName:'Perth, Australia'},now),null);
  assert.equal(normaliseJob('adzuna',{...ad,location:{display_name:'Remote UK',area:['UK']}},now),null);
  assert.equal(normaliseJob('adzuna',{...ad,created:'2026-09-01T00:00:00Z'},now),null);
  assert.equal(normaliseJob('reed',{...reed,jobUrl:'https://evil.example/'},now),null);
