@@ -77,6 +77,20 @@ test('browse links work for guests and members; history and access gates remain 
   await act(async()=>{view=create(React.createElement(App))});
   assert.equal(scrolled,beforeDeepLink);assert.equal(view.root.findByProps({id:'live-feed'}).children[0],'industry/engineering');
   await act(async()=>view.unmount());
+  // Supabase can emit SIGNED_IN repeatedly when a tab regains focus.
+  // A refreshed session for the same user must not unmount the current section.
+  update('/');memberAccess=true;jobHuntAccess=true;
+  await act(async()=>{view=create(React.createElement(App))});
+  const nav=view.root.findAllByType('button').find(button=>button.children.some(child=>typeof child==='string'&&child.includes('Member discussions')));
+  await act(async()=>nav.props.onClick());
+  assert.equal(nav.props.className,'active');
+  await act(async()=>authEvent('SIGNED_IN',{user:{id:'member'},access_token:'refreshed'}));
+  assert.equal(nav.props.className,'active','same-user SIGNED_IN preserves the section');
+  await act(async()=>authEvent('TOKEN_REFRESHED',{user:{id:'member'},access_token:'newer'}));
+  assert.equal(nav.props.className,'active','token refresh preserves the section');
+  await act(async()=>authEvent('SIGNED_IN',{user:{id:'another'}}));
+  assert.equal(view.root.findAllByType('button').find(button=>button.children.some(child=>typeof child==='string'&&child.includes('Member discussions'))).props.className,'','an actual change of user opens account');
+  await act(async()=>view.unmount());
   update('/#guide-a-smarter-scottish-job-search');memberAccess=true;jobHuntAccess=true;
   await act(async()=>{view=create(React.createElement(App))});
   assert.equal(view.root.findAllByProps({id:'browse-go'}).length,1,'signed-in visitor can open a public guide link');
