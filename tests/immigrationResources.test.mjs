@@ -33,8 +33,8 @@ test('public immigration guides, checklists and FAQ render and checklist control
   await act(async()=>view.unmount());
   await act(async()=>{view=create(React.createElement(HomeFaq))});
   assert.equal(view.root.findAllByProps({id:'faq'}).length,1);
-  assert.equal(view.root.findAllByType('details').length,8);
-  const faq=JSON.stringify(view.toJSON());assert.match(faq,/not currently delivered to the employer/);assert.match(faq,/not an employer’s ATS/);assert.match(faq,/free to read/i);
+  assert.equal(view.root.findAllByType('details').length,7);
+  const faq=JSON.stringify(view.toJSON());assert.doesNotMatch(faq,/What happens when I apply through ScotSponsor/);assert.doesNotMatch(faq,/A submission confirmation is not an employer response/);assert.match(faq,/not an employer’s ATS/);assert.match(faq,/free to read/i);
   await act(async()=>view.unmount());
  }finally{await rm(dir,{recursive:true,force:true})}
 });
