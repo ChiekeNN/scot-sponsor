@@ -21,8 +21,9 @@ test('public immigration guides, checklists and FAQ render and checklist control
   assert.equal(view.root.findAllByProps({id:'essential-checklists'}).length,1);
   const cards=view.root.findAllByProps({className:'route-card'});assert.equal(cards.length,9);
   const texts=JSON.stringify(view.toJSON());
+  assert.doesNotMatch(texts,/A starting point, not immigration advice|These summaries were checked against the linked/);
   for(const name of ['Student Visa','Employers','Skilled Worker Route','High Potential Individual (HPI)','Graduate Immigration Route (GIR)','Innovator Founder visa','Global Talent Visa','Government Authorised Exchange (GAE)','Youth Mobility Scheme (YMS)'])assert.ok(texts.includes(name),name);
-  assert.equal(view.root.findAll(node=>node.type==='a' && node.props.href?.startsWith('https://www.gov.uk/')).length,12);
+  assert.equal(view.root.findAll(node=>node.type==='a' && node.props.href?.startsWith('https://www.gov.uk/')).length,11);
   const boxes=view.root.findAllByProps({type:'checkbox'});assert.equal(boxes.length,16);
   await act(async()=>boxes[0].props.onChange({target:{checked:true}}));
   assert.equal(view.root.findAllByProps({type:'checkbox'})[0].props.checked,true);
