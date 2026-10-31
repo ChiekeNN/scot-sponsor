@@ -1,6 +1,6 @@
 export type Guide = {
   slug: string; category: 'Job search' | 'CV & applications' | 'Interviews' | 'Working in Scotland' | 'Sponsorship';
-  title: string; description: string; reading: string; accent: string; reviewed?: string;
+  title: string; description: string; reading: string; accent: string; image: string; reviewed?: string;
   intro: string; sections: { heading: string; body: string; bullets?: string[] }[];
   takeaway: string; sources: { label: string; url: string }[];
 };
@@ -8,7 +8,7 @@ export type Guide = {
 // Evergreen editorial guides, not live news or immigration advice.
 export const guides: Guide[] = [
   {
-    slug: 'visa-when-a-relationship-ends', category: 'Sponsorship', title: 'If your relationship ends: understanding your visa options',
+    slug: 'visa-when-a-relationship-ends', image: '/images/journal/highlands-loch.jpg', category: 'Sponsorship', title: 'If your relationship ends: understanding your visa options',
     description: 'A sensitive, practical guide to notifying the Home Office and finding support in Scotland.', reading: '5 min read', accent: 'lavender', reviewed: '30 October 2026',
     intro: 'A separation can be difficult, and immigration questions may add to the uncertainty. If your permission is based on your relationship, check the official guidance promptly and get individual advice. You do not need to handle this alone.',
     sections: [
@@ -20,7 +20,7 @@ export const guides: Guide[] = [
     sources: [{ label: 'GOV.UK: tell the Home Office', url: 'https://www.gov.uk/visas-when-you-separate-or-divorce' }, { label: 'GOV.UK: apply to stay in the UK', url: 'https://www.gov.uk/visas-when-you-separate-or-divorce/apply-stay-uk' }, { label: 'mygov.scot: support in Scotland', url: 'https://www.mygov.scot/relationship-problem' }, { label: 'GOV.UK: find an immigration adviser', url: 'https://www.gov.uk/find-an-immigration-adviser' }],
   },
   {
-    slug: 'if-your-visa-sponsor-loses-licence', category: 'Sponsorship', title: 'If your visa sponsor loses its licence: what to check',
+    slug: 'if-your-visa-sponsor-loses-licence', image: '/images/journal/reviewing-documents.jpg', category: 'Sponsorship', title: 'If your visa sponsor loses its licence: what to check',
     description: 'Understand the difference between a licence suspension and loss, and where to find official help.', reading: '5 min read', accent: 'blue', reviewed: '30 October 2026',
     intro: 'News about an employer’s sponsorship licence can be unsettling. The right next step depends on whether the licence is suspended or lost, whether you are in the UK and your own immigration circumstances.',
     sections: [
@@ -32,7 +32,7 @@ export const guides: Guide[] = [
     sources: [{ label: 'GOV.UK: if your visa sponsor loses their licence', url: 'https://www.gov.uk/employee-lose-sponsor-licence' }, { label: 'GOV.UK: register of licensed sponsors', url: 'https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers' }, { label: 'GOV.UK: find an immigration adviser', url: 'https://www.gov.uk/find-an-immigration-adviser' }],
   },
   {
-    slug: 'a-smarter-scottish-job-search', category: 'Job search', title: 'A smarter way to start your Scottish job search',
+    slug: 'a-smarter-scottish-job-search', image: '/images/journal/edinburgh-street.jpg', category: 'Job search', title: 'A smarter way to start your Scottish job search',
     description: 'Turn a broad search into a manageable plan, one meaningful step at a time.', reading: '4 min read', accent: 'blue',
     intro: 'A good job search is less about applying everywhere and more about knowing what you are looking for, keeping a record, and improving as you go.',
     sections: [
@@ -43,7 +43,7 @@ export const guides: Guide[] = [
     sources: [{ label: 'National Careers Service: careers advice', url: 'https://nationalcareers.service.gov.uk/careers-advice' }],
   },
   {
-    slug: 'sponsorship-questions-to-ask', category: 'Sponsorship', title: 'Sponsorship: the questions worth asking early',
+    slug: 'sponsorship-questions-to-ask', image: '/images/journal/professional-conversation.jpg', category: 'Sponsorship', title: 'Sponsorship: the questions worth asking early',
     description: 'A sponsor licence is a starting point—not a promise that every vacancy is sponsored.', reading: '4 min read', accent: 'sage',
     intro: 'If you need sponsorship, asking clear questions early can help you decide where to focus. A company appearing on the sponsor register does not mean it will sponsor every position.',
     sections: [
@@ -54,7 +54,7 @@ export const guides: Guide[] = [
     sources: [{ label: 'GOV.UK: register of licensed sponsors', url: 'https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers' }, { label: 'GOV.UK: Skilled Worker visa', url: 'https://www.gov.uk/skilled-worker-visa' }],
   },
   {
-    slug: 'cv-that-tells-your-story', category: 'CV & applications', title: 'Build a CV that tells your story clearly',
+    slug: 'cv-that-tells-your-story', image: '/images/journal/planning-a-cv.jpg', category: 'CV & applications', title: 'Build a CV that tells your story clearly',
     description: 'Make it easy for a recruiter to see the experience and skills you bring.', reading: '5 min read', accent: 'lavender',
     intro: 'Your CV is a concise introduction, not a record of everything you have ever done. Focus on relevant evidence and keep the layout easy to read.',
     sections: [
@@ -65,7 +65,7 @@ export const guides: Guide[] = [
     sources: [{ label: 'National Careers Service: how to write a CV', url: 'https://nationalcareers.service.gov.uk/careers-advice/cv-sections' }],
   },
   {
-    slug: 'tailor-your-application', category: 'CV & applications', title: 'Tailor an application without starting over',
+    slug: 'tailor-your-application', image: '/images/journal/tailoring-an-application.jpg', category: 'CV & applications', title: 'Tailor an application without starting over',
     description: 'A simple checklist for connecting your experience to the role in front of you.', reading: '3 min read', accent: 'sand',
     intro: 'A tailored application shows the employer why your experience matters to their particular role. It does not require inventing a new CV for every vacancy.',
     sections: [
@@ -76,7 +76,7 @@ export const guides: Guide[] = [
     sources: [{ label: 'National Careers Service: careers advice', url: 'https://nationalcareers.service.gov.uk/careers-advice' }],
   },
   {
-    slug: 'answer-interview-questions-with-star', category: 'Interviews', title: 'Tell a stronger interview story with STAR',
+    slug: 'answer-interview-questions-with-star', image: '/images/journal/interview-conversation.jpg', category: 'Interviews', title: 'Tell a stronger interview story with STAR',
     description: 'Give your examples structure while still sounding like yourself.', reading: '4 min read', accent: 'peach',
     intro: 'The STAR method can help you answer questions about a time you demonstrated a skill. It gives your listener enough context to understand your contribution.',
     sections: [
@@ -87,7 +87,7 @@ export const guides: Guide[] = [
     sources: [{ label: 'National Careers Service: interview tips', url: 'https://nationalcareers.service.gov.uk/careers-advice/interview-advice' }],
   },
   {
-    slug: 'interview-day-checklist', category: 'Interviews', title: 'Your calm, practical interview-day checklist',
+    slug: 'interview-day-checklist', image: '/images/journal/interview-preparation.jpg', category: 'Interviews', title: 'Your calm, practical interview-day checklist',
     description: 'What to prepare before, during and after an in-person or video interview.', reading: '4 min read', accent: 'blue',
     intro: 'You do not need to predict every question. A little preparation gives you more room to listen, think and show what you can do.',
     sections: [
@@ -98,7 +98,7 @@ export const guides: Guide[] = [
     sources: [{ label: 'National Careers Service: interview tips', url: 'https://nationalcareers.service.gov.uk/careers-advice/interview-advice' }, { label: 'National Careers Service: video interviews', url: 'https://nationalcareers.service.gov.uk/careers-advice/how-to-do-well-in-video-interviews' }],
   },
   {
-    slug: 'before-you-accept-a-job-offer', category: 'Working in Scotland', title: 'Before you say yes: reviewing a job offer',
+    slug: 'before-you-accept-a-job-offer', image: '/images/journal/reviewing-an-offer.jpg', category: 'Working in Scotland', title: 'Before you say yes: reviewing a job offer',
     description: 'Look beyond the headline salary and understand the practical details of your offer.', reading: '4 min read', accent: 'sage',
     intro: 'Receiving an offer is exciting. Take time to understand the terms and ask questions before deciding whether the role works for you.',
     sections: [
@@ -109,7 +109,7 @@ export const guides: Guide[] = [
     sources: [{ label: 'Acas: written statements and employment terms', url: 'https://www.acas.org.uk/what-must-be-written-in-an-employment-contract/what-the-written-statement-must-include' }, { label: 'GOV.UK: Skilled Worker visa', url: 'https://www.gov.uk/skilled-worker-visa' }],
   },
   {
-    slug: 'follow-up-with-confidence', category: 'Job search', title: 'How to follow up without overthinking it',
+    slug: 'follow-up-with-confidence', image: '/images/journal/following-up.jpg', category: 'Job search', title: 'How to follow up without overthinking it',
     description: 'A polite message can help you stay organised and keep a conversation moving.', reading: '3 min read', accent: 'lavender',
     intro: 'Waiting to hear back can be difficult. A short, courteous follow-up can help you understand what happens next without putting pressure on the hiring team.',
     sections: [
