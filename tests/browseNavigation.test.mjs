@@ -7,7 +7,7 @@ import React from 'react';
 import {create,act} from 'react-test-renderer';
 import {transformWithEsbuild} from 'vite';
 
-test('homepage links navigate to the filtered live feed; direct links and browser history work for signed-in users',async()=>{
+test('browse links require membership; filtered feed and history work for members',async()=>{
  const old={window:globalThis.window,document:globalThis.document,localStorage:globalThis.localStorage};
  const cache=join(process.cwd(),'node_modules','.cache');await mkdir(cache,{recursive:true});const dir=await mkdtemp(join(cache,'browse-route-'));
  try{
@@ -16,8 +16,8 @@ test('homepage links navigate to the filtered live feed; direct links and browse
   globalThis.window={setInterval,clearInterval,get location(){return location},history:{pushState(_a,_b,url){update(url)},replaceState(_a,_b,url){update(url)}},addEventListener(name,cb){handlers[name]=cb},removeEventListener(name){delete handlers[name]},scrollTo(){},requestAnimationFrame(cb){cb();return 1},cancelAnimationFrame(){}};
   globalThis.document={getElementById(){return {scrollIntoView(){scrolled++},focus(){focus++}}}};
   globalThis.localStorage={getItem(){return null},setItem(){}};
-  let currentSession=null;
-  globalThis.__browseAuth={rpc:async()=>({data:[],error:null}),auth:{getSession:async()=>({data:{session:currentSession}}),onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}})}};
+  let currentSession=null;let memberAccess=true;let jobHuntAccess=true;
+  globalThis.__browseAuth={rpc:async(name)=>({data:name==='can_access_member_insights'?memberAccess:name==='can_access_job_hunt'?jobHuntAccess:[],error:null}),auth:{getSession:async()=>({data:{session:currentSession}}),onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}})}};
   const noop='import React from "react";export const component=()=>React.createElement("div");';
   const stubs={
    Features:`${noop} export const HomePage=component,ToolsPage=component,TrackerPage=component,InstallCard=component;`,
@@ -36,12 +36,19 @@ test('homepage links navigate to the filtered live feed; direct links and browse
   const path=join(dir,'App.mjs');await writeFile(path,code);const {default:App}=await import(pathToFileURL(path).href);
   let view;await act(async()=>{view=create(React.createElement(App))});
   await act(async()=>view.root.findByProps({id:'browse-go'}).props.onClick());
-  assert.equal(location.search,'?browse=industry&id=engineering');assert.equal(view.root.findByProps({id:'live-feed'}).children[0],'industry/engineering');assert.equal(view.root.findAllByProps({className:'demo-notice'}).length,0);assert.ok(scrolled>0);assert.ok(focus>0);
-  await act(async()=>view.root.findByProps({id:'live-feed'}).props.onClick());assert.equal(location.search,'');assert.equal(view.root.findByProps({id:'live-feed'}).children[0],'all jobs');
-  update('/?browse=location&id=glasgow#scotland-jobs');await act(async()=>handlers.popstate());assert.equal(view.root.findByProps({id:'live-feed'}).children[0],'location/glasgow');
-  update('/');await act(async()=>handlers.popstate());assert.equal(view.root.findAllByProps({id:'browse-go'}).length,1);
+  assert.equal(location.search,'?browse=industry&id=engineering');assert.equal(view.root.findAllByProps({id:'live-feed'}).length,0);
+  assert.equal(view.root.findAllByProps({className:'member-gate-shell'}).length,1);
   await act(async()=>view.unmount());
   update('/?browse=popular&id=developer#scotland-jobs');currentSession={user:{id:'member'}};
-  await act(async()=>{view=create(React.createElement(App))});assert.equal(view.root.findByProps({id:'live-feed'}).children[0],'popular/developer');assert.equal(view.root.findAllByProps({id:'browse-go'}).length,0);await act(async()=>view.unmount());
+  await act(async()=>{view=create(React.createElement(App))});
+  assert.equal(view.root.findByProps({id:'live-feed'}).children[0],'popular/developer');assert.equal(view.root.findAllByProps({id:'browse-go'}).length,0);
+  await act(async()=>view.root.findByProps({id:'live-feed'}).props.onClick());assert.equal(location.search,'');
+  update('/?browse=location&id=glasgow#scotland-jobs');await act(async()=>handlers.popstate());assert.equal(view.root.findByProps({id:'live-feed'}).children[0],'location/glasgow');
+  update('/');await act(async()=>handlers.popstate());assert.equal(view.root.findAllByProps({id:'browse-go'}).length,1);
+  assert.ok(scrolled>0);assert.ok(focus>0);await act(async()=>view.unmount());
+  update('/?browse=popular&id=developer#scotland-jobs');memberAccess=false;jobHuntAccess=false;
+  await act(async()=>{view=create(React.createElement(App))});
+  assert.equal(view.root.findAllByProps({id:'live-feed'}).length,0);assert.equal(view.root.findAllByProps({className:'member-gate-shell'}).length,1);
+  await act(async()=>view.unmount());
  }finally{delete globalThis.__browseAuth;for(const [key,value] of Object.entries(old)){if(value===undefined)delete globalThis[key];else globalThis[key]=value}await rm(dir,{recursive:true,force:true})}
 });
