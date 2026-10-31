@@ -148,3 +148,6 @@ body{background:#f5f7f8}
 .public-mobile-menu nav{max-height:calc(100vh - 86px);max-height:calc(100dvh - 86px);overflow-y:auto;overscroll-behavior:contain}
 @media(max-width:650px){.public-site :is(#top,#scotland-jobs,#browse-jobs,#how-it-works,#features,#sponsor-insights,#journal,#membership,.journal-article){scroll-margin-top:84px}}
 @media print{.public-header-shell,.topbar{position:static;box-shadow:none}}
+
+/* Live counts on the industry browse links */
+.browse-link-end{display:inline-flex;align-items:center;justify-content:flex-end;gap:8px;flex:none}.browse-job-count{font-size:10px;font-weight:700;white-space:nowrap;color:#357078;background:#edf7f4;border-radius:20px;padding:4px 8px}.browse-count-status{font-size:11px;color:#6c8c8c;margin:0 0 10px}.browse-count-status button{border:0;background:none;padding:0;color:#176879;font-weight:700;text-decoration:underline}
