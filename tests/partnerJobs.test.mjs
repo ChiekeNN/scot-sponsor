@@ -44,3 +44,8 @@ test('job UI supports more than 500 and the sync lock is service-only',async()=>
  const ui=await readFile('src/PartnerJobs.tsx','utf8');assert.match(ui,/p_offset:1000,p_limit:1000/);assert.match(ui,/setShown\(n=>n\+50\)/);assert.match(ui,/isAdmin&&/);
  const sql=await readFile('supabase/migrations/20261031200000_partner_sync_reservation.sql','utf8');assert.match(sql,/revoke all on function public.reserve_partner_job_sync\(\) from public, anon, authenticated/);assert.match(sql,/90 seconds/);
 });
+
+test('job details preserve factual salary and contract fields without assuming missing values',()=>{
+ const job=normaliseJob('adzuna',{...ad,salary_min:30000,salary_max:40000,salary_is_predicted:1,contract_type:'permanent',contract_time:'full_time'},now);assert.equal(job.salary_min,30000);assert.equal(job.salary_max,40000);assert.equal(job.salary_is_predicted,true);assert.equal(job.contract_type,'permanent');
+ const missing=normaliseJob('adzuna',{...ad,salary_min:-99,salary_max:1e20},now);assert.equal(missing.salary_min,null);assert.equal(missing.salary_max,null);
+});
