@@ -52,3 +52,11 @@ test('import run moves across ineligible result pages and wraps safely without f
  assert.equal(result.status,200);assert.equal(finished.p_page,0);assert.equal(finished.p_offset,0);assert.equal(finished.p_result,'partial');
  assert.equal(calls.length,5);assert.ok(calls.every(url=>new URL(url).pathname==='/search-jobs'));
 });
+
+// A current Aberdeenshire advert at Westhill Academy has a full on-page job description.
+test('accepts Westhill while retaining country and complete-description checks',()=>{
+ const westhill=html.replace('Inverness Salary','Westhill Academy, Westhill Salary');
+ assert.equal(extract(westhill,url,Date.parse('2026-10-31T14:00:00Z')).location,'Westhill Academy, Westhill');
+ assert.equal(extract(westhill.replace('Westhill Academy, Westhill Salary','Westhill, England Salary'),url,Date.parse('2026-10-31T14:00:00Z')),null);
+ assert.equal(extract(westhill.replace('<h2>Job Attachments</h2>',''),url,Date.parse('2026-10-31T14:00:00Z')),null);
+});
