@@ -33,14 +33,23 @@ test('industry, job and location filters match relevant text without substring c
 
 test('homepage browser exposes genuine links and hands the selected category to navigation',async()=>{
  const cache=join(process.cwd(),'node_modules','.cache');await mkdir(cache,{recursive:true});const dir=await mkdtemp(join(cache,'browse-test-'));
+ const oldWindow=globalThis.window;let fail=false;const calls=[];let view;
+ globalThis.window={setInterval,clearInterval,addEventListener(){},removeEventListener(){}};
+ globalThis.__countsClient={rpc:async(name,args)=>{calls.push({name,args});if(fail)return {error: true};return {data:args.p_categories.map((item,i)=>({id:item.id,total:i===0?1:i===1?0:20}))};}};
  try{
-  const source=await readFile('src/JobBrowse.tsx','utf8');const compiled=await transformWithEsbuild(source,'src/JobBrowse.tsx',{jsx:'automatic'});const path=join(dir,'browse.mjs');await writeFile(path,compiled.code.replace('"./jobBrowse.mjs"',JSON.stringify(pathToFileURL(join(process.cwd(),'src/jobBrowse.mjs')).href)));
-  const {JobBrowse}=await import(pathToFileURL(path).href);let selected=null;let view;await act(async()=>{view=create(React.createElement(JobBrowse,{onBrowse:x=>{selected=x}}))});
-  const text=()=>JSON.stringify(view.toJSON());assert.match(text(),/Browse by industry/);assert.match(text(),/Accounting & Finance Jobs/);assert.equal(view.root.findAllByType('a').length,28);
+  await writeFile(join(dir,'directoryClient.mjs'),'export const directoryClient=globalThis.__countsClient;');
+  const source=await readFile('src/JobBrowse.tsx','utf8');const compiled=await transformWithEsbuild(source,'src/JobBrowse.tsx',{jsx:'automatic'});const path=join(dir,'browse.mjs');await writeFile(path,compiled.code.replace('"./directoryClient"','"./directoryClient.mjs"').replace('"./jobBrowse.mjs"',JSON.stringify(pathToFileURL(join(process.cwd(),'src/jobBrowse.mjs')).href)));
+  const {JobBrowse}=await import(pathToFileURL(path).href);let selected=null;await act(async()=>{view=create(React.createElement(JobBrowse,{onBrowse:x=>{selected=x}}))});
+  const text=()=>JSON.stringify(view.toJSON());assert.match(text(),/Browse by industry/);assert.match(text(),/Accounting & Finance Jobs/);assert.deepEqual(view.root.findAllByProps({className:'browse-job-count'}).slice(0,3).map(x=>x.children.join('')),['1 job','0 jobs','20 jobs']);assert.equal(calls[0].name,'public_industry_job_counts');assert.equal(calls[0].args.p_categories.length,28);assert.equal(view.root.findAllByType('a').length,28);
   const engineering=view.root.findAllByType('a').find(a=>a.props.href==='?browse=industry&id=engineering#scotland-jobs');assert.ok(engineering);let prevented=false;await act(async()=>{engineering.props.onClick({button:0,preventDefault(){prevented=true}})});assert.equal(prevented,true);assert.deepEqual(selected,{kind:'industry',id:'engineering'});
   prevented=false;engineering.props.onClick({button:0,ctrlKey:true,preventDefault(){prevented=true}});assert.equal(prevented,false);
   await act(async()=>{view.root.findAllByType('button').find(b=>b.props.children.some?.(c=>c==='Browse by popular jobs')).props.onClick()});assert.match(text(),/No Experience Jobs/);assert.equal(view.root.findAllByType('a').length,30);
   await act(async()=>{view.root.findAllByType('button').find(b=>b.props.children.some?.(c=>c==='Browse by location')).props.onClick()});assert.match(text(),/Glasgow Jobs/);assert.match(text(),/Edinburgh Jobs/);assert.equal(view.root.findAllByType('a').length,browseGroups.location.length);
   await act(async()=>view.unmount());
- }finally{await rm(dir,{recursive:true,force:true})}
+  fail=true;await act(async()=>{view=create(React.createElement(JobBrowse,{onBrowse(){}}))});
+  assert.match(JSON.stringify(view.toJSON()),/Job counts are temporarily unavailable/);
+  assert.doesNotMatch(JSON.stringify(view.toJSON()),/0 jobs/);
+  fail=false;await act(async()=>view.root.findAllByType('button').find(b=>b.children.includes('Try again')).props.onClick());
+  assert.equal(view.root.findAllByProps({className:'browse-job-count'})[0].children.join(''),'1 job');await act(async()=>view.unmount());
+ }finally{if(view)await act(async()=>view.unmount());globalThis.window=oldWindow;delete globalThis.__countsClient;await rm(dir,{recursive:true,force:true})}
 });
