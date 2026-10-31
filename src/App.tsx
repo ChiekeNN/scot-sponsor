@@ -18,6 +18,7 @@ import type { Session } from '@supabase/supabase-js';
 import { BookOpen, FileText, Home, Calculator, ClipboardList, ArrowRight, Bell, Bookmark, Briefcase, Building2, Check, CheckCircle2, ChevronRight, HelpCircle, ExternalLink, GraduationCap, Info, LayoutDashboard, Menu, MessageCircle, ShieldCheck, Sparkles, X } from 'lucide-react';
 
 const SAVED_JOBS_KEY = 'scotsponsor-saved-real';
+const isPublicJournalHash = () => window.location.hash === '#journal' || window.location.hash.startsWith('#guide-');
 function readSaved(): string[] { try { const value = JSON.parse(localStorage.getItem(SAVED_JOBS_KEY) || '[]'); return Array.isArray(value) ? [...new Set(value.filter((id): id is string => typeof id === 'string' && id.length <= 100))].slice(0,2000) : []; } catch { return []; } }
 function App() {
   const initialBrowse = useMemo(() => browseFromSearch(window.location.search), []);
@@ -61,11 +62,11 @@ function App() {
     void refreshChat();const timer=window.setInterval(()=>void refreshChat(),15000);window.addEventListener('focus',refreshChat);
     return()=>{active=false;window.clearInterval(timer);window.removeEventListener('focus',refreshChat)};
   },[session?.user.id]);
-  useEffect(() => { if (!directoryClient) return; let live = true; directoryClient.auth.getSession().then(({data}) => { if (live && data.session) { setSession(data.session); setShowLanding(false); if (!browseFromSearch(window.location.search)) setPage('account'); } }); const {data} = directoryClient.auth.onAuthStateChange((event, next) => { if (!live) return; setSession(next); if (event === 'PASSWORD_RECOVERY') { setRecovering(true); setShowLanding(false); setPage('account'); } if (event === 'SIGNED_OUT') { setRecovering(false); setShowLanding(true); setPage('home'); } if (event === 'SIGNED_IN' && next) { setShowLanding(false); if (!browseFromSearch(window.location.search)) setPage('account'); } }); return () => { live = false; data.subscription.unsubscribe(); }; }, []);
+  useEffect(() => { if (!directoryClient) return; let live = true; directoryClient.auth.getSession().then(({data}) => { if (live && data.session) { setSession(data.session); if (!isPublicJournalHash()) { setShowLanding(false); if (!browseFromSearch(window.location.search)) setPage('account'); } } }); const {data} = directoryClient.auth.onAuthStateChange((event, next) => { if (!live) return; setSession(next); if (event === 'PASSWORD_RECOVERY') { setRecovering(true); setShowLanding(false); setPage('account'); } if (event === 'SIGNED_OUT') { setRecovering(false); setShowLanding(true); setPage('home'); } if (event === 'SIGNED_IN' && next && !isPublicJournalHash()) { setShowLanding(false); if (!browseFromSearch(window.location.search)) setPage('account'); } }); return () => { live = false; data.subscription.unsubscribe(); }; }, []);
   useEffect(() => { try { localStorage.setItem(SAVED_JOBS_KEY, JSON.stringify(saved)); } catch { /* Browser storage may be unavailable. */ } }, [saved]);
   const toggleSaved = (id: string) => setSaved(current => current.includes(id) ? current.filter(item => item !== id) : [...current, id]);
   const clearBrowse = () => { setBrowseSelection(null); if (browseFromSearch(window.location.search)) window.history.replaceState(null, '', clearBrowseUrl(window.location.href)); };
-  const navigate = (next: typeof page, signup = false) => { setAccountSignup(signup); clearBrowse(); setPage(next); setMobileMenu(false); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  const navigate = (next: typeof page, signup = false) => { setAccountSignup(signup); clearBrowse(); if (next !== 'journal' && isPublicJournalHash()) window.history.replaceState(null, '', window.location.pathname + window.location.search); setPage(next); setMobileMenu(false); window.scrollTo({ top: 0, behavior: 'smooth' }); };
   const isListings = page === 'jobs' || page === 'saved';
   const openDemo = (destination: 'home' | 'jobs' | 'tools' | 'tracker' = 'home') => { setAccessModal(null); setShowLanding(false); navigate(destination === 'home' ? 'account' : destination); };
   const openLanding = () => { if (browseFromSearch(window.location.search)) window.history.pushState(null, '', clearBrowseUrl(window.location.href)); setBrowseSelection(null); setMobileMenu(false); setShowLanding(true); window.scrollTo({ top: 0, behavior: 'smooth' }); };
