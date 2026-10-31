@@ -26,3 +26,19 @@ test('feed defaults to public read-only and application intake remains disabled'
  const sql=await readFile('supabase/migrations/20261030233000_partner_job_feed.sql','utf8');assert.match(sql,/grant select on public.partner_jobs to anon, authenticated/);assert.doesNotMatch(sql,/grant (?:insert|update|all) on public.partner_jobs to anon/);assert.match(sql,/14 days/);
  const ui=await readFile('src/PartnerJobs.tsx','utf8');assert.match(ui,/Apply through ScotSponsor · unavailable/);assert.match(ui,/not directly to the employer/);assert.doesNotMatch(ui,/type="file"/);
 });
+test('Adzuna ingestion can import over 500 distinct Scotland jobs',async()=>{
+ let pages=0;const request=async(url)=>{pages++;const page=Number(new URL(url).pathname.split('/').pop());return {ok:true,json:async()=>({results:page<=12?Array.from({length:50},(_,i)=>({...ad,id:String((page-1)*50+i),redirect_url:`http://adzuna.co.uk/jobs/land/ad/${(page-1)*50+i}`})):[]})}};
+ const out=await collectSource('adzuna',{request,env:{ADZUNA_APP_ID:'id',ADZUNA_APP_KEY:'secret'},now});
+ assert.equal(out.jobs.length,600);assert.equal(pages,13);assert.equal(out.jobs[0].source_url.startsWith('https://adzuna.co.uk/'),true);
+});
+test('manual sync is restricted to authenticated super-admins',async()=>{
+ const res=()=>({setHeader(){},end(s){this.body=JSON.parse(s)}});let r=res();let calls=0;
+ const create=()=>({auth:{getUser:async()=>({data:{user:{id:'member'}}})},rpc:async(name)=>{assert.equal(name,'is_super_admin');return {data:false}}});
+ const handler=makeSyncHandler({env:{},create,request:async()=>{calls++;throw Error('should not fetch')}});
+ await handler({method:'POST',headers:{}},r);assert.equal(r.statusCode,401);
+ r=res();await handler({method:'POST',headers:{authorization:'Bearer member-token'}},r);assert.equal(r.statusCode,403);assert.equal(calls,0);
+});
+test('job UI supports more than 500 and the sync lock is service-only',async()=>{
+ const ui=await readFile('src/PartnerJobs.tsx','utf8');assert.match(ui,/range\(0,999\)/);assert.match(ui,/setShown\(n=>n\+50\)/);assert.match(ui,/isAdmin&&/);
+ const sql=await readFile('supabase/migrations/20261031200000_partner_sync_reservation.sql','utf8');assert.match(sql,/revoke all on function public.reserve_partner_job_sync\(\) from public, anon, authenticated/);assert.match(sql,/90 seconds/);
+});
