@@ -16,7 +16,7 @@ test('workspace and admin dashboard are mounted only after access checks',async(
  assert.match(app,/!showLanding && hasMemberAccess && <div className="app-shell">/);
  assert.match(app,/adminAlerts\.isAdmin && <button className=\{page === 'home'/);
  assert.match(app,/page === 'home' \? \(adminAlerts\.isAdmin/);
- assert.match(app,/page === 'cv' \? \(accessForSession\?\.jobHunt/);
+ assert.match(app,/page === 'cv' \|\| page === 'analyser' \? \(accessForSession\?\.jobHunt/);
  assert.match(app,/access\?\.userId === session\.user\.id/);
  assert.match(app,/if \(event === 'SIGNED_OUT'\).*setShowLanding\(true\)/);
 });

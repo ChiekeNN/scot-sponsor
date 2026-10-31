@@ -38,8 +38,8 @@ async function extractFile(file: File): Promise<string> {
   throw new Error('Choose a PDF, DOCX or TXT file.');
 }
 
-export function CvStudio() {
-  const [tab, setTab] = useState<'builder' | 'checker'>('builder');
+export function CvStudio({initialTab = 'builder'}: {initialTab?: 'builder' | 'checker'}) {
+  const [tab, setTab] = useState<'builder' | 'checker'>(initialTab);
   const [cv, setCv] = useState<CvData>(readCv);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'unavailable'>('saved');
   const [source, setSource] = useState<'builder' | 'paste'>('builder');
@@ -63,8 +63,8 @@ export function CvStudio() {
     finally { setReading(false); }
   };
   const reset = () => { if (window.confirm('Delete your saved CV draft from this browser? This cannot be undone.')) { setCv(blankCv()); setAnalysed(false); } };
-  return <section className="cv-studio"><div className="cv-heading"><div><div className="section-kicker">YOUR JOB HUNT TOOLKIT <span>✳</span></div><h1>Put your best<br/><em>foot forward.</em></h1><p>Build a clear, professional CV and tailor it to the opportunity in front of you.</p></div><span className="cv-premium"><Sparkles size={14}/> JOB HUNT PASS FEATURE · PREVIEW</span></div>
-    <div className="cv-demo-note"><Info size={17}/><span><strong>Preview access:</strong> These tools are planned for the Job Hunt Pass. Accounts and paid access are not connected, so everyone can try them for now.</span></div>
+  return <section className="cv-studio"><div className="cv-heading"><div><div className="section-kicker">YOUR JOB HUNT TOOLKIT <span>✳</span></div><h1>Put your best<br/><em>foot forward.</em></h1><p>Build a clear, professional CV and tailor it to the opportunity in front of you.</p></div><span className="cv-premium"><Sparkles size={14}/> JOB HUNT PASS FEATURE</span></div>
+    <div className="cv-demo-note"><Info size={17}/><span><strong>Private on this device:</strong> Your CV draft and analysis stay in this browser. The keyword check is a guide, not an employer ATS or a prediction of hiring outcomes.</span></div>
     <div className="cv-tabs" role="tablist" aria-label="CV tools"><button role="tab" aria-selected={tab === 'builder'} onClick={() => setTab('builder')}><FileText size={17}/> CV builder</button><button role="tab" aria-selected={tab === 'checker'} onClick={() => setTab('checker')}><ClipboardCheck size={17}/> ATS-style check</button></div>
     {tab === 'builder' ? <div className="cv-layout"><div className="cv-editor"><div className="cv-section-head"><div><span className="section-kicker">STEP 01 / YOUR STORY</span><h2>Build your CV</h2><p>Start with the essentials. Your preview updates as you type.</p></div><span className={`cv-save-state ${saveStatus === 'unavailable' ? 'warning' : ''}`}><span/>{saveStatus === 'saved' ? 'Saved on this device' : 'Storage unavailable'}</span></div>
       <div className="cv-privacy"><ShieldCheck size={16}/><span>Your draft stays in this browser and isn’t sent to a server. Avoid adding your date of birth, passport or visa number. Clearing browser data deletes your draft.</span></div>
