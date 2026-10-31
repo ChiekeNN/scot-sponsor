@@ -23,7 +23,7 @@ export function makeSyncHandler({env=process.env,request=fetch,create=createClie
  if(reserved.error)return send(res,503,{error:'Could not start the sync.'});
  if(!reserved.data)return send(res,429,{error:'A sync was started recently. Please wait two minutes.'});
  const status={};
- for(const source of ['adzuna','reed'])try{
+ for(const source of ['reed'])try{
   const {jobs,truncated}=await collectSource(source,{request,env});
   const now=new Date().toISOString();
   for(let i=0;i<jobs.length;i+=250){const result=await client.from('partner_jobs').upsert(jobs.slice(i,i+250).map(j=>({...j,last_seen:now})),{onConflict:'source,external_id'});if(result.error)throw Error('SAVE_FAILED')}

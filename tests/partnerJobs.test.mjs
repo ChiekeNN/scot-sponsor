@@ -4,25 +4,21 @@ import {readFile} from 'node:fs/promises';
 import {normaliseJob,collectSource} from '../lib/partner-jobs.js';
 import {makeSyncHandler} from '../api/cron/sync-partner-jobs.js';
 const now=Date.parse('2026-10-30T12:00:00Z');
-const ad={id:'123',title:'Engineer',description:'Job description',location:{display_name:'Glasgow, Scotland',area:['UK','Scotland','Glasgow']},created:'2026-10-29T12:00:00Z',redirect_url:'https://www.adzuna.co.uk/jobs/land/ad/123',company:{display_name:'Employer'}};
 const reed={jobId:55,jobTitle:'Engineer',locationName:'Edinburgh, Scotland',date:'29/10/2026',jobUrl:'https://www.reed.co.uk/jobs/example/55',jobDescription:'Example',employerName:'Employer'};
-test('normalises recent UK records and excludes foreign, uncertain or unsafe data',()=>{
- assert.equal(normaliseJob('adzuna',ad,now).title,'Engineer');assert.equal(normaliseJob('reed',reed,now).source,'reed');
- assert.equal(normaliseJob('reed',{...reed,locationName:'Scotland Gate, Northumberland'},now),null);
+test('normalises recent Scottish records and excludes foreign, uncertain or unsafe data',()=>{
+ assert.equal(normaliseJob('reed',reed,now).source,'reed');
  for(const place of ['Hawick, Scottish Borders','Lerwick, Shetland Islands','Kirkwall, Orkney Islands','Stornoway, Western Isles','Dunbar, East Lothian'])assert.ok(normaliseJob('reed',{...reed,locationName:place},now),place);
- assert.equal(normaliseJob('reed',{...reed,locationName:'Hamilton, England'},now),null);
- assert.equal(normaliseJob('reed',{...reed,locationName:'Perth, Australia'},now),null);
- assert.ok(normaliseJob('adzuna',{...ad,location:{display_name:'Remote UK',area:['UK']}},now));
- for(const [name,area] of [['London',['UK','London']],['Cardiff',['UK','Wales']],['Belfast',['UK','Northern Ireland']],['Manchester',['UK','North West England']]]) { const job=normaliseJob('adzuna',{...ad,location:{display_name:name,area}},now);assert.ok(job,name);assert.match(job.location_search,/UK/);}
- assert.equal(normaliseJob('adzuna',{...ad,location:{display_name:'Perth, Australia',area:['Australia']}},now),null);assert.equal(normaliseJob('adzuna',{...ad,location:{display_name:'Perth, Australia',area:['UK','Australia']}},now),null);assert.equal(normaliseJob('adzuna',{...ad,location:{display_name:'unknown',area:[]}},now),null);
- assert.equal(normaliseJob('adzuna',{...ad,created:'2026-09-01T00:00:00Z'},now),null);
+ for(const place of ['Scotland Gate, Northumberland','Hamilton, England','Perth, Australia','London, England','Cardiff, Wales','Belfast, Northern Ireland','Unknown'])assert.equal(normaliseJob('reed',{...reed,locationName:place},now),null,place);
+ assert.equal(normaliseJob('other',reed,now),null);
  assert.equal(normaliseJob('reed',{...reed,jobUrl:'https://evil.example/'},now),null);
  assert.equal(normaliseJob('reed',{...reed,date:'30/02/2026'},now),null);
+ assert.equal(normaliseJob('reed',{...reed,date:'01/09/2026'},now),null);
 });
-test('source collectors enforce credentials, record bounds and do not send secrets to clients',async()=>{
+test('source collector enforces credentials, location and bounded pagination',async()=>{
  await assert.rejects(()=>collectSource('reed',{env:{}}),/NOT_CONFIGURED/);
- let calls=0;const request=async(url)=>{calls++;assert.match(url,/api\.adzuna\.com/);assert.equal(new URL(url).searchParams.has('where'),false);return {ok:true,json:async()=>({results:[ad]})}};
- const out=await collectSource('adzuna',{request,env:{ADZUNA_APP_ID:'id',ADZUNA_APP_KEY:'secret'},now});assert.equal(out.jobs.length,1);assert.equal(calls,1);assert.doesNotMatch(JSON.stringify(out),/secret/);
+ await assert.rejects(()=>collectSource('other',{env:{}}),/UNKNOWN_SOURCE/);
+ let calls=0;const request=async(url,options)=>{calls++;assert.equal(new URL(url).searchParams.get('locationName'),'Scotland');assert.ok(options.headers.Authorization.startsWith('Basic '));return {ok:true,json:async()=>({results:[reed]})}};
+ const out=await collectSource('reed',{request,env:{REED_API_KEY:'secret'},now});assert.equal(out.jobs.length,1);assert.equal(calls,1);assert.doesNotMatch(JSON.stringify(out),/secret/);
 });
 test('cron requires secret and never reveals it',async()=>{
  const res={setHeader(){},end(s){this.body=JSON.parse(s)}};await makeSyncHandler({env:{CRON_SECRET:'secret'}})({method:'GET',headers:{authorization:'Bearer wrong'}},res);assert.equal(res.statusCode,401);assert.doesNotMatch(JSON.stringify(res.body),/secret/);
@@ -32,11 +28,6 @@ test('feed is read-only and support requests stay private',async()=>{
  const intake=await readFile('supabase/migrations/20261031201500_application_support.sql','utf8');assert.match(intake,/not public.can_access_job_hunt/);assert.match(intake,/not public.is_super_admin/);assert.match(intake,/revoke all on public.application_support_requests from public, anon, authenticated/);assert.match(intake,/90 days/);
  const ui=await readFile('src/JobDetails.tsx','utf8');assert.doesNotMatch(ui,/ApplicationSupport|request_application_support_for_job/);
  const feed=await readFile('src/PartnerJobs.tsx','utf8');assert.doesNotMatch(feed,/View source &amp; apply/);assert.doesNotMatch(feed,/adzuna/i);assert.match(feed,/public_job_search/);
-});
-test('Adzuna ingestion can import over 500 distinct Scotland jobs',async()=>{
- let pages=0;const request=async(url)=>{pages++;const page=Number(new URL(url).pathname.split('/').pop());return {ok:true,json:async()=>({results:page<=12?Array.from({length:50},(_,i)=>({...ad,id:String((page-1)*50+i),redirect_url:`http://adzuna.co.uk/jobs/land/ad/${(page-1)*50+i}`})):[]})}};
- const out=await collectSource('adzuna',{request,env:{ADZUNA_APP_ID:'id',ADZUNA_APP_KEY:'secret'},now});
- assert.equal(out.jobs.length,600);assert.equal(pages,13);assert.equal(out.jobs[0].source_url.startsWith('https://adzuna.co.uk/'),true);
 });
 test('manual sync is restricted to authenticated super-admins',async()=>{
  const res=()=>({setHeader(){},end(s){this.body=JSON.parse(s)}});let r=res();let calls=0;
@@ -50,7 +41,10 @@ test('job UI supports more than 500 and the sync lock is service-only',async()=>
  const sql=await readFile('supabase/migrations/20261031200000_partner_sync_reservation.sql','utf8');assert.match(sql,/revoke all on function public.reserve_partner_job_sync\(\) from public, anon, authenticated/);assert.match(sql,/90 seconds/);
 });
 
-test('job details preserve factual salary and contract fields without assuming missing values',()=>{
- const job=normaliseJob('adzuna',{...ad,salary_min:30000,salary_max:40000,salary_is_predicted:1,contract_type:'permanent',contract_time:'full_time'},now);assert.equal(job.salary_min,30000);assert.equal(job.salary_max,40000);assert.equal(job.salary_is_predicted,true);assert.equal(job.contract_type,'permanent');
- const missing=normaliseJob('adzuna',{...ad,salary_min:-99,salary_max:1e20},now);assert.equal(missing.salary_min,null);assert.equal(missing.salary_max,null);
+test('job detail candidates preserve valid salary without inventing contract data',()=>{
+ const job=normaliseJob('reed',{...reed,minimumSalary:30000,maximumSalary:40000},now);assert.equal(job.salary_min,30000);assert.equal(job.salary_max,40000);assert.equal(job.contract_type,null);
+ const missing=normaliseJob('reed',{...reed,minimumSalary:-99,maximumSalary:1e20},now);assert.equal(missing.salary_min,null);assert.equal(missing.salary_max,null);
+});
+test('retired source cannot be re-imported by an older deployment',async()=>{
+ const sql=await readFile('supabase/migrations/20261101040000_scotland_jobs_remove_adzuna.sql','utf8');assert.match(sql,/delete from public.partner_jobs where source='adzuna'/);assert.match(sql,/check \(source in \('reed'\)\)/);assert.match(sql,/drop function if exists public.import_adzuna_full_description/);
 });
