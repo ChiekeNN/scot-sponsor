@@ -7,7 +7,7 @@ import React from 'react';
 import {create,act} from 'react-test-renderer';
 import {transformWithEsbuild} from 'vite';
 
-test('browse links require membership; filtered feed and history work for members',async()=>{
+test('browse links work for guests and members; history and access gates remain correct',async()=>{
  const old={window:globalThis.window,document:globalThis.document,localStorage:globalThis.localStorage};
  const cache=join(process.cwd(),'node_modules','.cache');await mkdir(cache,{recursive:true});const dir=await mkdtemp(join(cache,'browse-route-'));
  try{
@@ -21,7 +21,7 @@ test('browse links require membership; filtered feed and history work for member
   const noop='import React from "react";export const component=()=>React.createElement("div");';
   const stubs={
    Features:`${noop} export const HomePage=component,ToolsPage=component,TrackerPage=component,InstallCard=component;`,
-   Landing:'import React from "react";export const PublicLanding=({onBrowse})=>React.createElement("button",{id:"browse-go",onClick:()=>onBrowse({kind:"industry",id:"engineering"})},"Browse engineering");export const AccessModal=()=>null;',
+   Landing:'import React from "react";export const PublicLanding=({onBrowse,jobFeed})=>React.createElement(React.Fragment,null,React.createElement("button",{id:"browse-go",onClick:()=>onBrowse({kind:"industry",id:"engineering"})},"Browse engineering"),jobFeed);export const AccessModal=()=>null;',
    plans:'export const plans={monthly:{name:"monthly",price:"",period:"",description:"",features:[],terms:""},jobHunt:{name:"job",price:"",period:"",description:"",features:[],terms:""}};',
    CvStudio:`${noop} export const CvStudio=component;`,Journal:`${noop} export const Journal=component;`,SponsorDirectory:`${noop} export const SponsorDirectory=component;`,AccountCenter:`${noop} export const AccountCenter=component;`,
    AdminAlerts:`${noop} export const AdminAlerts=component;export const useAdminAlerts=()=>({isAdmin:false,feed:null,error:null,refresh(){}});`,
@@ -36,19 +36,19 @@ test('browse links require membership; filtered feed and history work for member
   const path=join(dir,'App.mjs');await writeFile(path,code);const {default:App}=await import(pathToFileURL(path).href);
   let view;await act(async()=>{view=create(React.createElement(App))});
   await act(async()=>view.root.findByProps({id:'browse-go'}).props.onClick());
-  assert.equal(location.search,'?browse=industry&id=engineering');assert.equal(view.root.findAllByProps({id:'live-feed'}).length,0);
-  assert.equal(view.root.findAllByProps({className:'member-gate-shell'}).length,1);
+  assert.equal(location.search,'?browse=industry&id=engineering');assert.equal(view.root.findByProps({id:'live-feed'}).children[0],'industry/engineering');
+  assert.equal(view.root.findAllByProps({className:'member-gate-shell'}).length,0);
   await act(async()=>view.unmount());
   update('/?browse=popular&id=developer#scotland-jobs');currentSession={user:{id:'member'}};
   await act(async()=>{view=create(React.createElement(App))});
-  assert.equal(view.root.findByProps({id:'live-feed'}).children[0],'popular/developer');assert.equal(view.root.findAllByProps({id:'browse-go'}).length,0);
+  assert.equal(view.root.findByProps({id:'live-feed'}).children[0],'popular/developer');assert.equal(view.root.findAllByProps({id:'browse-go'}).length,1);
   await act(async()=>view.root.findByProps({id:'live-feed'}).props.onClick());assert.equal(location.search,'');
   update('/?browse=location&id=glasgow#scotland-jobs');await act(async()=>handlers.popstate());assert.equal(view.root.findByProps({id:'live-feed'}).children[0],'location/glasgow');
   update('/');await act(async()=>handlers.popstate());assert.equal(view.root.findAllByProps({id:'browse-go'}).length,1);
   assert.ok(scrolled>0);assert.ok(focus>0);await act(async()=>view.unmount());
   update('/?browse=popular&id=developer#scotland-jobs');memberAccess=false;jobHuntAccess=false;
   await act(async()=>{view=create(React.createElement(App))});
-  assert.equal(view.root.findAllByProps({id:'live-feed'}).length,0);assert.equal(view.root.findAllByProps({className:'member-gate-shell'}).length,1);
+  assert.equal(view.root.findByProps({id:'live-feed'}).children[0],'popular/developer');assert.equal(view.root.findAllByProps({className:'member-gate-shell'}).length,0);
   await act(async()=>view.unmount());
   update('/#guide-a-smarter-scottish-job-search');memberAccess=true;jobHuntAccess=true;
   await act(async()=>{view=create(React.createElement(App))});

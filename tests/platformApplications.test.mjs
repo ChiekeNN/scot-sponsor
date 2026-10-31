@@ -45,8 +45,8 @@ test('admin list can edit, suspend, reactivate and delete applications',async()=
  }finally{globalThis.window=oldWindow;delete globalThis.__adminAppClient;await rm(dir,{recursive:true,force:true})}
 });
 
-test('applications and CVs have server-side access controls and listings are confined to the member workspace',async()=>{
+test('applications and CVs stay private while listings are also shown publicly',async()=>{
  const sql=await readFile('supabase/migrations/20261101073000_platform_job_applications.sql','utf8');
  assert.match(sql,/revoke all on public\.platform_job_applications from public, anon, authenticated/i);assert.match(sql,/if not public\.is_super_admin\(\) then raise exception 'NOT_AUTHORISED'/i);assert.match(sql,/public\.public_job_detail\(p_job_id\) is null/i);assert.match(sql,/octet_length\(contents\) not between 5 and 2097152/i);assert.match(sql,/delete from public\.platform_job_applications where id=p_id/i);assert.match(sql,/revoke all on function public\.submit_platform_application[^;]+from public, anon/i);
- const landing=await readFile('src/Landing.tsx','utf8');const app=await readFile('src/App.tsx','utf8');const account=await readFile('src/AccountCenter.tsx','utf8');assert.doesNotMatch(landing,/<PartnerJobs/);assert.match(app,/page === 'home' \?[^\n]+<PartnerJobs/);assert.match(account,/screen === 'admin' && isAdmin \? <><AdminJobApplications/);
+ const landing=await readFile('src/Landing.tsx','utf8');const app=await readFile('src/App.tsx','utf8');const account=await readFile('src/AccountCenter.tsx','utf8');assert.match(landing,/\{jobFeed\}/);assert.match(app,/showLanding && <PublicLanding jobFeed=\{<PartnerJobs/);assert.match(account,/screen === 'admin' && isAdmin \? <><AdminJobApplications/);
 });

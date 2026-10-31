@@ -7,7 +7,7 @@ export const plans = {
     description: 'A flexible way to keep your job search moving.',
     features: [
       'Email alerts for new jobs matching your role and location',
-      'Job excerpts and available vacancy information',
+      'Free public access to job listings is available to everyone',
       'Sponsor information and job wording where available',
       'Use the free saved jobs and application tracker',
     ],
@@ -27,7 +27,7 @@ export const plans = {
       'Graduate Visa Switch Planner with a personalised timeline',
       'Search and download the Scottish sponsor directory by industry or location',
       'Job-search checklist and employer outreach templates',
-      'Explore detailed job information where available',
+      'Free public access to full job descriptions where available',
     ],
     terms: '90 days of access. No automatic renewal.',
   },
