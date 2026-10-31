@@ -12,10 +12,11 @@ test('super admin can identify, ban, remove and restore members; ordinary member
  const cache=join(process.cwd(),'node_modules','.cache');await mkdir(cache,{recursive:true});const dir=await mkdtemp(join(cache,'forum-ui-'));
  let view;
  try{
-  globalThis.window={setInterval,clearInterval,confirm:()=>true,prompt:()=>null};globalThis.document={getElementById:()=>({scrollIntoView(){}})};
+  globalThis.window={setInterval,clearInterval,addEventListener(){},removeEventListener(){},confirm:()=>true,prompt:()=>null};globalThis.document={getElementById:()=>({scrollIntoView(){}})};
   const calls=[];let status='active';
   globalThis.__forumRpc={rpc:async(name,args)=>{calls.push({name,args});const member={user_id:'member',email:'member@example.test',status,is_admin:false};
-   if(name==='forum_threads_list')return {data:[{id:'thread',title:'Test question',body:'Test details for members',created_at:'2026-10-31T20:00:00Z',own:false,replies:0}],error:null};
+   if(name==='forum_available_plans')return {data:[{plan:'monthly_alert_pass'},{plan:'job_hunt_pass'}],error:null};
+   if(name==='forum_plan_threads_list')return {data:[{id:'thread',title:'Test question',body:'Test details for members',created_at:'2026-10-31T20:00:00Z',own:false,replies:0}],error:null};
    if(name==='forum_admin_members'||name==='forum_admin_author')return {data:[member],error:null};
    if(name==='forum_admin_moderate_member'){status=args.p_action==='ban'?'banned':args.p_action==='remove'?'removed':'active';return {data:null,error:null}};
    return {data:[],error:null};}};
