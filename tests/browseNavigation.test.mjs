@@ -13,11 +13,11 @@ test('homepage links navigate to the filtered live feed; direct links and browse
  try{
   let location=new URL('https://example.test/');const handlers={};let focus=0,scrolled=0;
   const update=url=>{location=new URL(url,location.href)};
-  globalThis.window={get location(){return location},history:{pushState(_a,_b,url){update(url)},replaceState(_a,_b,url){update(url)}},addEventListener(name,cb){handlers[name]=cb},removeEventListener(name){delete handlers[name]},scrollTo(){},requestAnimationFrame(cb){cb();return 1},cancelAnimationFrame(){}};
+  globalThis.window={setInterval,clearInterval,get location(){return location},history:{pushState(_a,_b,url){update(url)},replaceState(_a,_b,url){update(url)}},addEventListener(name,cb){handlers[name]=cb},removeEventListener(name){delete handlers[name]},scrollTo(){},requestAnimationFrame(cb){cb();return 1},cancelAnimationFrame(){}};
   globalThis.document={getElementById(){return {scrollIntoView(){scrolled++},focus(){focus++}}}};
   globalThis.localStorage={getItem(){return null},setItem(){}};
   let currentSession=null;
-  globalThis.__browseAuth={auth:{getSession:async()=>({data:{session:currentSession}}),onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}})}};
+  globalThis.__browseAuth={rpc:async()=>({data:[],error:null}),auth:{getSession:async()=>({data:{session:currentSession}}),onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}})}};
   const noop='import React from "react";export const component=()=>React.createElement("div");';
   const stubs={
    Features:`${noop} export const HomePage=component,ToolsPage=component,TrackerPage=component,InstallCard=component;`,
@@ -25,7 +25,7 @@ test('homepage links navigate to the filtered live feed; direct links and browse
    plans:'export const plans={monthly:{name:"monthly",price:"",period:"",description:"",features:[],terms:""},jobHunt:{name:"job",price:"",period:"",description:"",features:[],terms:""}};',
    CvStudio:`${noop} export const CvStudio=component;`,Journal:`${noop} export const Journal=component;`,SponsorDirectory:`${noop} export const SponsorDirectory=component;`,AccountCenter:`${noop} export const AccountCenter=component;`,
    AdminAlerts:`${noop} export const AdminAlerts=component;export const useAdminAlerts=()=>({isAdmin:false,feed:null,error:null,refresh(){}});`,
-   ImmigrationInsights:`${noop} export const ImmigrationInsights=component;`,MemberTools:`${noop} export const MemberTools=component;`,
+   MemberChat:`${noop} export const MemberChat=component;`,ImmigrationInsights:`${noop} export const ImmigrationInsights=component;`,MemberTools:`${noop} export const MemberTools=component;`,
    PartnerJobs:'import React from "react";export const PartnerJobs=({browseSelection,onClearBrowse})=>React.createElement("button",{id:"live-feed",onClick:onClearBrowse},browseSelection?`${browseSelection.kind}/${browseSelection.id}`:"all jobs");',
    directoryClient:'export const directoryClient=globalThis.__browseAuth;'
   };
