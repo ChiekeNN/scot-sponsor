@@ -60,3 +60,12 @@ test('accepts Westhill while retaining country and complete-description checks',
  assert.equal(extract(westhill.replace('Westhill Academy, Westhill Salary','Westhill, England Salary'),url,Date.parse('2026-10-31T14:00:00Z')),null);
  assert.equal(extract(westhill.replace('<h2>Job Attachments</h2>',''),url,Date.parse('2026-10-31T14:00:00Z')),null);
 });
+
+test('daily scan starts tomorrow at 11pm Lagos, chains bounded pages and keeps the importer private',async()=>{
+ const sql=await readFile('supabase/migrations/20261101120000_daily_scottish_job_batches.sql','utf8');
+ assert.match(sql,/'0 22 \* \* \*'/);assert.match(sql,/Africa\/Lagos/);assert.match(sql,/daily_start_on/);
+ assert.match(sql,/scotland_job_start_batch\('daily'\)/);assert.match(sql,/scotland_job_queue_page\(\)/);
+ assert.match(sql,/p_result not in \('ok','partial'\)/);assert.match(sql,/batch_steps>=150/);
+ assert.match(sql,/revoke all on function public\.scotland_job_queue_page\(\) from public,anon,authenticated/);
+ assert.match(sql,/revoke all on function public\.scotland_job_start_batch\(text\) from public,anon,authenticated/);
+});
