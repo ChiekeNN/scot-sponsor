@@ -77,7 +77,7 @@ The scheduled myjobscotland importer uses public council job pages and retains s
 
 ## Job details and full descriptions
 
-Each job card opens an on-site detail view. Search snippets stay private until a complete detail is imported or entered. The application never displays an excerpt as a complete detail.
+Each job card opens an on-site detail view. Signed-in super-admins can edit the full description from each available job; the editor is hidden from other users and saving is authorised on the server. Saved descriptions are public. Search snippets stay private until a complete detail is imported or entered. The application never displays an excerpt as a complete detail.
 
 Provider descriptions are shown only while their source observation is current and the original listing fingerprint matches. Separately published attachments are not displayed in the job detail view. The platform does not submit applications to employers.
 
