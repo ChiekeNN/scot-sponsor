@@ -14,3 +14,6 @@ These photographs are from Pexels. Its [licence](https://www.pexels.com/license/
 | interview-preparation.jpg | [Pexels photo 5439137](https://www.pexels.com/photo/5439137/) |
 | reviewing-an-offer.jpg | [Pexels photo 5989926](https://www.pexels.com/photo/5989926/) |
 | following-up.jpg | [Pexels photo 8133906](https://www.pexels.com/photo/8133906/) |
+| sponsor-records.jpg | [Pexels photo 6964080](https://www.pexels.com/photo/6964080/) |
+| healthcare-workers.jpg | [Pexels photo 6129145](https://www.pexels.com/photo/6129145/) |
+| founder-planning.jpg | [Pexels photo 374831](https://www.pexels.com/photo/374831/) |
