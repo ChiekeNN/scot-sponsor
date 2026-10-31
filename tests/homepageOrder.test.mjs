@@ -14,3 +14,12 @@ test('homepage places Scotland insights directly after the hero and before the p
  assert.match(source,/\{jobFeed\}<JobBrowse/);
  assert.match(source,/<JobBrowse onBrowse=\{onBrowse\}\s*\/>/);
 });
+
+test('the two requested notices are removed from the homepage without hiding jobs or insights',async()=>{
+ const insights=await readFile('src/SponsorInsights.tsx','utf8');
+ const app=await readFile('src/App.tsx','utf8');
+ const landing=await readFile('src/Landing.tsx','utf8');
+ assert.doesNotMatch(insights,/A snapshot, not a live register\.|The supplied report does not state when its data was captured/);
+ assert.match(landing,/<SponsorInsights\/>/);
+ assert.match(app,/showLanding && <PublicLanding jobFeed=\{<PartnerJobs showNotice=\{false\}/);
+});
