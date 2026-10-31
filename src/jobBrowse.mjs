@@ -63,7 +63,7 @@ export const browseGroups={
   item('recruitment','Recruitment Jobs',['recruitment','recruiter','recruiting']),
   item('it-recruiter','IT Recruiter Jobs',['it recruiter','recruiter it','it recruitment','recruitment it','technology recruiter','technical recruiter','technical recruitment'])
  ],
- location:['Aberdeen','Aberdeenshire','Ayr','Dundee','Dumfries','Dunfermline','East Kilbride','Edinburgh','Falkirk','Fife','Glasgow','Hamilton','Inverness','Kilmarnock','Kirkcaldy','Livingston','Motherwell','Paisley','Perth','Stirling','West Lothian'].map(name=>item(name.toLowerCase().replace(/\s+/g,'-'),`${name} Jobs`,[name]))
+ location:['Aberdeen','Aberdeenshire','Ayr','Dundee','Dumfries','Dunfermline','East Kilbride','Edinburgh','Falkirk','Fife','Glasgow','Hamilton','Inverness','Kilmarnock','Kirkcaldy','Livingston','Motherwell','Paisley','Perth','Stirling','West Lothian','London','Manchester','Birmingham','Liverpool','Leeds','Bristol','Newcastle','Sheffield','Nottingham','Leicester','Cardiff','Swansea','Belfast','Oxford','Cambridge','England','Wales','Northern Ireland','Scotland'].map(name=>item(name.toLowerCase().replace(/\s+/g,'-'),`${name} Jobs`,[name]))
 };
 export function getBrowseItem(selection){return selection&&Object.prototype.hasOwnProperty.call(browseGroups,selection.kind)?browseGroups[selection.kind].find(i=>i.id===selection.id)||null:null}
 const normalise=value=>String(value||'').normalize('NFKC').toLocaleLowerCase('en-GB').replace(/[^\p{L}\p{N}]+/gu,' ').trim();
