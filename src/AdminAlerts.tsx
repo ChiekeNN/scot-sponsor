@@ -11,22 +11,33 @@ const dateTime = (value: string | null) => value ? new Date(value).toLocaleStrin
 export function useAdminAlerts(session: Session | null) {
   const [adminUserId, setAdminUserId] = useState<string | null>(null);
   const isAdmin = !!session && adminUserId === session.user.id;
+  const [checkedUserId, setCheckedUserId] = useState<string | null>(null);
+  const [roleError, setRoleError] = useState(false);
+  const roleReady = !session || checkedUserId === session.user.id;
   const [feed, setFeed] = useState<Feed | null>(null);
   const [error, setError] = useState(false);
   useEffect(() => {
     let active = true;
-    setAdminUserId(null); setFeed(null); setError(false);
+    setAdminUserId(null); setCheckedUserId(null); setRoleError(false); setFeed(null); setError(false);
     if (!session || !directoryClient) return () => { active = false; };
     const load = async () => {
-      const admin = await directoryClient!.rpc('is_super_admin');
-      if (!active) return;
-      if (admin.error) { setAdminUserId(null); setFeed(null); setError(true); return; }
-      if (admin.data !== true) { setAdminUserId(null); setFeed(null); return; }
-      setAdminUserId(session.user.id);
-      const result = await directoryClient!.rpc('admin_notification_feed');
-      if (!active) return;
-      if (result.error) setError(true);
-      else { setFeed(result.data as Feed); setError(false); }
+      try {
+        const admin = await directoryClient!.rpc('is_super_admin');
+        if (!active) return;
+        if (admin.error) throw admin.error;
+        setCheckedUserId(session.user.id); setRoleError(false);
+        if (admin.data !== true) { setAdminUserId(null); setFeed(null); setError(false); return; }
+        setAdminUserId(session.user.id);
+      } catch {
+        if (active) { setAdminUserId(null); setCheckedUserId(null); setRoleError(true); setFeed(null); setError(true); }
+        return;
+      }
+      try {
+        const result = await directoryClient!.rpc('admin_notification_feed');
+        if (!active) return;
+        if (result.error) setError(true);
+        else { setFeed(result.data as Feed); setError(false); }
+      } catch { if (active) setError(true); }
     };
     void load();
     const timer = window.setInterval(() => void load(), 60000);
@@ -38,7 +49,7 @@ export function useAdminAlerts(session: Session | null) {
     const result = await directoryClient.rpc('admin_notification_feed');
     if (result.error) setError(true); else { setFeed(result.data as Feed); setError(false); }
   }, [isAdmin]);
-  return { isAdmin, feed, error, refresh };
+  return { isAdmin, roleReady, roleError, feed, error, refresh };
 }
 
 function EntryList({ entries }: { entries: RegisterEntry[] | null }) {
