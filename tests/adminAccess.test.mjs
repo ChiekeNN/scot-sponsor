@@ -23,9 +23,10 @@ test('super admin sees both dashboards without expiry and no self-grant buttons'
     await writeFile(join(dir, 'directoryClient.mjs'), 'export const directoryClient = globalThis.__accountTestClient;');
     await writeFile(join(dir, 'PasswordField.mjs'), 'export const PasswordField = () => null;');
     await writeFile(join(dir, 'AdminAnalytics.mjs'), 'export const AdminAnalytics = () => null;');
+    await writeFile(join(dir, 'AdminApplications.mjs'), 'export const AdminApplications = () => null;');
     const source = await readFile('src/AccountCenter.tsx', 'utf8');
     const compiled = await transformWithEsbuild(source, 'src/AccountCenter.tsx', { jsx: 'automatic' });
-    const code = compiled.code.replace('"./directoryClient"', '"./directoryClient.mjs"').replace('"./PasswordField"', '"./PasswordField.mjs"').replace('"./AdminAnalytics"', '"./AdminAnalytics.mjs"');
+    const code = compiled.code.replace('"./directoryClient"', '"./directoryClient.mjs"').replace('"./PasswordField"', '"./PasswordField.mjs"').replace('"./AdminAnalytics"', '"./AdminAnalytics.mjs"').replace('"./AdminApplications"', '"./AdminApplications.mjs"');
     const path = join(dir, 'AccountCenter.mjs'); await writeFile(path, code);
     const { AccountCenter } = await import(pathToFileURL(path).href);
     let directoryOpened = false;

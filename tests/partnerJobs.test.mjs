@@ -22,9 +22,11 @@ test('source collectors enforce credentials, record bounds and do not send secre
 test('cron requires secret and never reveals it',async()=>{
  const res={setHeader(){},end(s){this.body=JSON.parse(s)}};await makeSyncHandler({env:{CRON_SECRET:'secret'}})({method:'GET',headers:{authorization:'Bearer wrong'}},res);assert.equal(res.statusCode,401);assert.doesNotMatch(JSON.stringify(res.body),/secret/);
 });
-test('feed defaults to public read-only and application intake remains disabled',async()=>{
- const sql=await readFile('supabase/migrations/20261030233000_partner_job_feed.sql','utf8');assert.match(sql,/grant select on public.partner_jobs to anon, authenticated/);assert.doesNotMatch(sql,/grant (?:insert|update|all) on public.partner_jobs to anon/);assert.match(sql,/14 days/);
- const ui=await readFile('src/PartnerJobs.tsx','utf8');assert.match(ui,/Apply through ScotSponsor · unavailable/);assert.match(ui,/not directly to the employer/);assert.doesNotMatch(ui,/type="file"/);
+test('feed is read-only and support requests stay private',async()=>{
+ const sql=await readFile('supabase/migrations/20261030233000_partner_job_feed.sql','utf8');assert.match(sql,/grant select on public.partner_jobs to anon, authenticated/);assert.doesNotMatch(sql,/grant (?:insert|update|all) on public.partner_jobs to anon/);
+ const intake=await readFile('supabase/migrations/20261031201500_application_support.sql','utf8');assert.match(intake,/not public.can_access_job_hunt/);assert.match(intake,/not public.is_super_admin/);assert.match(intake,/revoke all on public.application_support_requests from public, anon, authenticated/);assert.match(intake,/90 days/);
+ const ui=await readFile('src/ApplicationSupport.tsx','utf8');assert.match(ui,/not an application to the employer/);assert.match(ui,/No CV, cover letter or sensitive information/);assert.doesNotMatch(ui,/type="file"/);
+ const feed=await readFile('src/PartnerJobs.tsx','utf8');assert.doesNotMatch(feed,/View source &amp; apply/);assert.match(feed,/adzuna-attribution/);
 });
 test('Adzuna ingestion can import over 500 distinct Scotland jobs',async()=>{
  let pages=0;const request=async(url)=>{pages++;const page=Number(new URL(url).pathname.split('/').pop());return {ok:true,json:async()=>({results:page<=12?Array.from({length:50},(_,i)=>({...ad,id:String((page-1)*50+i),redirect_url:`http://adzuna.co.uk/jobs/land/ad/${(page-1)*50+i}`})):[]})}};
