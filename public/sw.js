@@ -1,4 +1,4 @@
-const CACHE = 'scotsponsor-shell-v29';
+const CACHE = 'scotsponsor-shell-v30';
 const SHELL = ['/', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/scotland-landscape.svg', '/career-support.jpg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(async cache => {

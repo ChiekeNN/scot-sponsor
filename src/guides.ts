@@ -8,6 +8,39 @@ export type Guide = {
 // Evergreen editorial guides, not live news or immigration advice.
 export const guides: Guide[] = [
   {
+    slug: 'graduate-visa-search-and-switch', image: '/images/journal/graduate-next-steps.jpg', category: 'Sponsorship', title: 'From Graduate visa to your next chapter',
+    description: 'Plan your job search, review your visa dates and explore a potential switch.', reading: '6 min read', accent: 'lavender', reviewed: '31 October 2026',
+    intro: 'The Graduate route can provide time to gain experience after eligible UK study, but it is not an automatic route to settlement or a guarantee of a later visa. Make a plan based on your own permission and the current rules.',
+    sections: [
+      { heading: 'Know the dates that apply to you', body: 'Check your visa expiry date and the current application requirements. A Graduate visa normally lasts two years for applications made on or before 31 December 2026, or 18 months for applications made from 1 January 2027. For a PhD or other doctoral qualification it normally lasts three years. Your own grant and circumstances matter; check GOV.UK for the latest rules.' },
+      { heading: 'Use the time deliberately', body: 'Explore suitable roles, build examples of your achievements and keep a record of applications and follow-ups. When speaking with an employer, explain your current right to work accurately and ask about the specific role’s longer-term possibilities rather than assuming sponsorship is available.' },
+      { heading: 'Plan a potential switch early', body: 'A switch to Skilled Worker may be possible if you and the job satisfy the requirements at the time of application. Check the employer’s sponsor licence, eligible occupation, salary and other conditions; the public register alone does not guarantee a certificate. Speak to a regulated immigration adviser if you need individual advice.' },
+    ], takeaway: 'Record your visa expiry date, then work backwards to set reminders for researching your options.',
+    sources: [{ label: 'GOV.UK: Graduate visa', url: 'https://www.gov.uk/graduate-visa' }, { label: 'GOV.UK: Skilled Worker visa', url: 'https://www.gov.uk/skilled-worker-visa' }, { label: 'GOV.UK: find an immigration adviser', url: 'https://www.gov.uk/find-an-immigration-adviser' }],
+  },
+  {
+    slug: 'sponsorship-job-search-questions', image: '/images/journal/sponsorship-questions.jpg', category: 'Sponsorship', title: 'A practical sponsorship job-search checklist',
+    description: 'Separate the employer’s licence from the requirements of the actual role.', reading: '5 min read', accent: 'sage', reviewed: '31 October 2026',
+    intro: 'Finding a licensed sponsor is a useful starting point, but it does not prove that a particular vacancy offers sponsorship. Use a series of checks before making decisions.',
+    sections: [
+      { heading: 'Start with the vacancy', body: 'Read the job description and consider whether your experience matches the work. Ask the employer whether it will sponsor this particular role and which route it has in mind. Be clear about your current permission without sharing sensitive documents in public.' },
+      { heading: 'Check the organisation and the rules', body: 'Search the current Home Office sponsor register for the correct legal entity. Then check the relevant occupation, salary and other eligibility conditions in current official guidance. A licence does not reveal available certificates or guarantee that an application will succeed.' },
+      { heading: 'Keep your search moving', body: 'Tailor each application, track deadlines and follow up respectfully. Consider a range of employers and job-search channels. For personal immigration decisions, use a regulated adviser rather than relying solely on an online checklist.' },
+    ], takeaway: 'Write down two questions for the hiring team: whether the specific role can be sponsored and what the next steps would be.',
+    sources: [{ label: 'GOV.UK: register of licensed sponsors', url: 'https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers' }, { label: 'GOV.UK: Skilled Worker visa', url: 'https://www.gov.uk/skilled-worker-visa' }, { label: 'GOV.UK: find an immigration adviser', url: 'https://www.gov.uk/find-an-immigration-adviser' }],
+  },
+  {
+    slug: 'cv-keywords-and-evidence', image: '/images/journal/cv-review.jpg', category: 'CV & applications', title: 'Tailor your CV without keyword stuffing',
+    description: 'Turn the job description into a focused, truthful application.', reading: '5 min read', accent: 'peach', reviewed: '31 October 2026',
+    intro: 'Applicant tracking systems and hiring processes differ. A simple keyword comparison can prompt useful edits, but no tool can promise a particular ranking or interview.',
+    sections: [
+      { heading: 'Choose the evidence', body: 'Identify the main responsibilities and essential criteria, then select examples from work, study or volunteering that demonstrate them. Use the employer’s terminology where it accurately describes your experience; do not claim skills you do not have.' },
+      { heading: 'Make your CV easy to read', body: 'Use familiar headings, consistent dates and a straightforward layout. Describe your contribution and its result where you can support it. Check the file format requested and review extracted text if using a file-based checker.' },
+      { heading: 'Review the whole application', body: 'Proofread names and contact details. If a covering letter is requested, explain your interest and connect a few relevant examples to the role. A checker can miss synonyms, context and formatting issues, so use your own judgement.' },
+    ], takeaway: 'Pick one essential criterion and add a specific, accurate example that demonstrates it.',
+    sources: [{ label: 'National Careers Service: CV sections', url: 'https://nationalcareers.service.gov.uk/careers-advice/cv-sections' }, { label: 'National Careers Service: covering letters', url: 'https://nationalcareers.service.gov.uk/careers-advice/covering-letter' }],
+  },
+  {
     slug: 'sponsorship-certificates-and-skills-charge', image: '/images/journal/sponsor-records.jpg', category: 'Sponsorship', title: 'Certificates of Sponsorship and the Immigration Skills Charge',
     description: 'Understand the questions to ask about certificates, employer costs and possible exemptions.', reading: '5 min read', accent: 'sage', reviewed: '31 October 2026',
     intro: 'An organisation on the sponsor register may not be able or willing to sponsor a particular vacancy. It is sensible to check the job, the prospective worker’s circumstances and the current Home Office guidance separately.',

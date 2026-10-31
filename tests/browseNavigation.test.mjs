@@ -25,6 +25,7 @@ test('browse links work for guests and members; history and access gates remain 
    plans:'export const plans={monthly:{name:"monthly",price:"",period:"",description:"",features:[],terms:""},jobHunt:{name:"job",price:"",period:"",description:"",features:[],terms:""}};',
    CvStudio:`${noop} export const CvStudio=component;`,Journal:`${noop} export const Journal=component;`,SponsorDirectory:`${noop} export const SponsorDirectory=component;`,AccountCenter:`${noop} export const AccountCenter=component;`,
    AdminAlerts:`${noop} export const AdminAlerts=component;export const useAdminAlerts=()=>({isAdmin:false,feed:null,error:null,refresh(){}});`,
+   CommunityForum:`${noop} export const CommunityForum=component;`,
    MemberChat:`${noop} export const MemberChat=component;`,ImmigrationInsights:`${noop} export const ImmigrationInsights=component;`,MemberTools:`${noop} export const MemberTools=component;`,
    PartnerJobs:'import React from "react";export const PartnerJobs=({browseSelection,onClearBrowse})=>React.createElement("button",{id:"live-feed",onClick:onClearBrowse},browseSelection?`${browseSelection.kind}/${browseSelection.id}`:"all jobs");',
    directoryClient:'export const directoryClient=globalThis.__browseAuth;'

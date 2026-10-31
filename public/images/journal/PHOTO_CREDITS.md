@@ -17,3 +17,6 @@ These photographs are from Pexels. Its [licence](https://www.pexels.com/license/
 | sponsor-records.jpg | [Pexels photo 6964080](https://www.pexels.com/photo/6964080/) |
 | healthcare-workers.jpg | [Pexels photo 6129145](https://www.pexels.com/photo/6129145/) |
 | founder-planning.jpg | [Pexels photo 374831](https://www.pexels.com/photo/374831/) |
+| graduate-next-steps.jpg | [Pexels photo 31290552](https://www.pexels.com/photo/31290552/) |
+| cv-review.jpg | [Pexels photo 7698712](https://www.pexels.com/photo/7698712/) |
+| sponsorship-questions.jpg | [Pexels photo 6918507](https://www.pexels.com/photo/6918507/) |
