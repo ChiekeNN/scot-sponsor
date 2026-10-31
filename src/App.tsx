@@ -64,7 +64,29 @@ function App() {
     void refreshChat();const timer=window.setInterval(()=>void refreshChat(),15000);window.addEventListener('focus',refreshChat);
     return()=>{active=false;window.clearInterval(timer);window.removeEventListener('focus',refreshChat)};
   },[session?.user.id]);
-  useEffect(() => { if (!directoryClient) return; let live = true; directoryClient.auth.getSession().then(({data}) => { if (live && data.session) { setSession(data.session); if (!isPublicResourceHash() && !browseFromSearch(window.location.search) && window.location.hash !== '#scotland-jobs') { setShowLanding(false); setPage('account'); } } }); const {data} = directoryClient.auth.onAuthStateChange((event, next) => { if (!live) return; setSession(next); if (event === 'PASSWORD_RECOVERY') { setRecovering(true); setShowLanding(false); setPage('account'); } if (event === 'SIGNED_OUT') { setRecovering(false); setShowLanding(true); setPage('home'); } if (event === 'SIGNED_IN' && next && !isPublicResourceHash() && !browseFromSearch(window.location.search) && window.location.hash !== '#scotland-jobs') { setShowLanding(false); setPage('account'); } }); return () => { live = false; data.subscription.unsubscribe(); }; }, []);
+  useEffect(() => {
+    if (!directoryClient) return;
+    let live = true, initialised = false;
+    let knownUser: string | null = null;
+    // Supabase may emit SIGNED_IN again when a tab regains focus. Only a new
+    // session/user should navigate; token refreshes must leave the view intact.
+    const applySession = (next: Session | null, openAccount: boolean) => {
+      const userId = next?.user.id ?? null;
+      const changed = !!userId && (!initialised || knownUser !== userId);
+      initialised = true; knownUser = userId; setSession(next);
+      if (openAccount && changed && !isPublicResourceHash() && !browseFromSearch(window.location.search) && window.location.hash !== '#scotland-jobs') {
+        setShowLanding(false); setPage('account');
+      }
+    };
+    void directoryClient.auth.getSession().then(({data}) => { if (live && !initialised) applySession(data.session, true); });
+    const {data} = directoryClient.auth.onAuthStateChange((event, next) => {
+      if (!live) return;
+      if (event === 'SIGNED_OUT') { applySession(null, false); setRecovering(false); setShowLanding(true); setPage('home'); return; }
+      applySession(next, event === 'INITIAL_SESSION' || event === 'SIGNED_IN');
+      if (event === 'PASSWORD_RECOVERY') { setRecovering(true); setShowLanding(false); setPage('account'); }
+    });
+    return () => { live = false; data.subscription.unsubscribe(); };
+  }, []);
   useEffect(() => { try { localStorage.setItem(SAVED_JOBS_KEY, JSON.stringify(saved)); } catch { /* Browser storage may be unavailable. */ } }, [saved]);
   const toggleSaved = (id: string) => setSaved(current => current.includes(id) ? current.filter(item => item !== id) : [...current, id]);
   const clearBrowse = () => { setBrowseSelection(null); if (browseFromSearch(window.location.search)) window.history.replaceState(null, '', clearBrowseUrl(window.location.href)); };
