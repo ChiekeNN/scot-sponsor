@@ -106,3 +106,5 @@ body{background:#f5f7f8}
 
 /* Readable, source-preserving job descriptions. */
 .job-detail-description{font-size:13px;line-height:1.8;color:#365b65;overflow-wrap:anywhere}.job-detail-description h4{font-size:14px;color:#244c5b;margin:22px 0 8px}.job-detail-description p{margin:0 0 14px;white-space:pre-wrap}.job-detail-description ul{padding-left:22px;margin:8px 0 18px}.job-detail-description li{padding-left:3px;margin:5px 0;white-space:pre-wrap}.job-detail-description strong{color:#254e5b}.job-detail-facts strong{overflow-wrap:anywhere}
+
+.partner-save{align-self:flex-start;display:inline-flex;align-items:center;gap:5px;border:1px solid #dbeae5;background:#f6faf8;color:#427773;border-radius:6px;padding:9px 10px;font-size:10px;font-weight:700}.partner-save.is-saved{background:#e3f2ed;color:#28695d}.partner-save:hover{border-color:#78a99d}@media(max-width:650px){.partner-save{margin-top:12px}}
