@@ -7,10 +7,10 @@ test('homepage places Scotland insights directly after the hero and before the p
  const hero=source.indexOf('<section className="public-hero">');
  assert.notEqual(hero,-1);
  const heroEnd=source.indexOf('</section>',hero)+'</section>'.length;
- assert.match(source.slice(heroEnd),/^\s*<SponsorInsights\/>\s*<section className="public-intro"/);
+ assert.match(source.slice(heroEnd),/^\s*<SponsorInsights\/>\s*\{jobFeed\}<JobBrowse/);
  assert.equal((source.match(/<SponsorInsights\s*\/>/g)||[]).length,1);
  assert.equal((source.match(/<PartnerJobs\b/g)||[]).length,0);
- assert.match(source,/No account or subscription is needed/);
+ assert.doesNotMatch(source,/SCOTTISH OPPORTUNITIES|Your next role|A little note:|ScotSponsor is currently a preview/);
  assert.match(source,/\{jobFeed\}<JobBrowse/);
  assert.match(source,/<JobBrowse onBrowse=\{onBrowse\}\s*\/>/);
 });
