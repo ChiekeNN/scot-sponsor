@@ -21,5 +21,17 @@ test('the two requested notices are removed from the homepage without hiding job
  const landing=await readFile('src/Landing.tsx','utf8');
  assert.doesNotMatch(insights,/A snapshot, not a live register\.|The supplied report does not state when its data was captured/);
  assert.match(landing,/<SponsorInsights\/>/);
- assert.match(app,/showLanding && <PublicLanding jobFeed=\{<PartnerJobs showNotice=\{false\}/);
+ assert.match(app,/showLanding && <PublicLanding jobFeed=\{<PartnerJobs/);
+});
+
+test('the requested platform notices are not rendered',async()=>{
+ const checks = [
+  ['src/Features.tsx',['A note before you begin:', 'Stored only in this browser on this device. Clearing browser data removes it; it does not sync or send reminders.']],
+  ['src/PartnerJobs.tsx',['Only available jobs with complete descriptions are shown. Jobs and their details can change or close.']],
+  ['src/App.tsx',['A note on eligibility']],
+  ['src/MemberTools.tsx',['Planning guidance, not immigration advice.']],
+  ['src/SponsorDirectory.tsx',['About this directory:']],
+  ['src/ImmigrationInsights.tsx',['Information, not an eligibility decision.','A simple arithmetic estimate, not an assessment of visa salary rules']]
+ ];
+ for (const [path,phrases] of checks) {const source=await readFile(path,'utf8');for(const phrase of phrases)assert.ok(!source.includes(phrase),`${path} still includes ${phrase}`);}
 });
