@@ -25,8 +25,8 @@ test('cron requires secret and never reveals it',async()=>{
 test('feed is read-only and support requests stay private',async()=>{
  const sql=await readFile('supabase/migrations/20261030233000_partner_job_feed.sql','utf8');assert.match(sql,/grant select on public.partner_jobs to anon, authenticated/);assert.doesNotMatch(sql,/grant (?:insert|update|all) on public.partner_jobs to anon/);
  const intake=await readFile('supabase/migrations/20261031201500_application_support.sql','utf8');assert.match(intake,/not public.can_access_job_hunt/);assert.match(intake,/not public.is_super_admin/);assert.match(intake,/revoke all on public.application_support_requests from public, anon, authenticated/);assert.match(intake,/90 days/);
- const ui=await readFile('src/ApplicationSupport.tsx','utf8');assert.match(ui,/not an application to the employer/);assert.match(ui,/No CV, cover letter or sensitive information/);assert.doesNotMatch(ui,/type="file"/);
- const feed=await readFile('src/PartnerJobs.tsx','utf8');assert.doesNotMatch(feed,/View source &amp; apply/);assert.match(feed,/adzuna-attribution/);
+ const ui=await readFile('src/ApplicationSupport.tsx','utf8');assert.match(ui,/not an application to the employer/);assert.match(ui,/File uploads are not available/);assert.doesNotMatch(ui,/type="file"/);
+ const feed=await readFile('src/PartnerJobs.tsx','utf8');assert.doesNotMatch(feed,/View source &amp; apply/);assert.doesNotMatch(feed,/adzuna/i);assert.match(feed,/public_job_list/);
 });
 test('Adzuna ingestion can import over 500 distinct Scotland jobs',async()=>{
  let pages=0;const request=async(url)=>{pages++;const page=Number(new URL(url).pathname.split('/').pop());return {ok:true,json:async()=>({results:page<=12?Array.from({length:50},(_,i)=>({...ad,id:String((page-1)*50+i),redirect_url:`http://adzuna.co.uk/jobs/land/ad/${(page-1)*50+i}`})):[]})}};
@@ -41,6 +41,6 @@ test('manual sync is restricted to authenticated super-admins',async()=>{
  r=res();await handler({method:'POST',headers:{authorization:'Bearer member-token'}},r);assert.equal(r.statusCode,403);assert.equal(calls,0);
 });
 test('job UI supports more than 500 and the sync lock is service-only',async()=>{
- const ui=await readFile('src/PartnerJobs.tsx','utf8');assert.match(ui,/range\(0,999\)/);assert.match(ui,/setShown\(n=>n\+50\)/);assert.match(ui,/isAdmin&&/);
+ const ui=await readFile('src/PartnerJobs.tsx','utf8');assert.match(ui,/p_offset:1000,p_limit:1000/);assert.match(ui,/setShown\(n=>n\+50\)/);assert.match(ui,/isAdmin&&/);
  const sql=await readFile('supabase/migrations/20261031200000_partner_sync_reservation.sql','utf8');assert.match(sql,/revoke all on function public.reserve_partner_job_sync\(\) from public, anon, authenticated/);assert.match(sql,/90 seconds/);
 });
