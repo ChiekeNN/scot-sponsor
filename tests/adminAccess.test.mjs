@@ -24,9 +24,10 @@ test('super admin sees both dashboards without expiry and no self-grant buttons'
     await writeFile(join(dir, 'PasswordField.mjs'), 'export const PasswordField = () => null;');
     await writeFile(join(dir, 'AdminAnalytics.mjs'), 'export const AdminAnalytics = () => null;');
     await writeFile(join(dir, 'AdminApplications.mjs'), 'export const AdminApplications = () => null;');
+    await writeFile(join(dir, 'SponsorshipChecker.mjs'), 'import React from "react"; export const SponsorshipChecker = () => React.createElement("div", null, "Subscriber checker");');
     const source = await readFile('src/AccountCenter.tsx', 'utf8');
     const compiled = await transformWithEsbuild(source, 'src/AccountCenter.tsx', { jsx: 'automatic' });
-    const code = compiled.code.replace('"./directoryClient"', '"./directoryClient.mjs"').replace('"./PasswordField"', '"./PasswordField.mjs"').replace('"./AdminAnalytics"', '"./AdminAnalytics.mjs"').replace('"./AdminApplications"', '"./AdminApplications.mjs"');
+    const code = compiled.code.replace('"./directoryClient"', '"./directoryClient.mjs"').replace('"./PasswordField"', '"./PasswordField.mjs"').replace('"./AdminAnalytics"', '"./AdminAnalytics.mjs"').replace('"./AdminApplications"', '"./AdminApplications.mjs"').replace('"./SponsorshipChecker"', '"./SponsorshipChecker.mjs"');
     const path = join(dir, 'AccountCenter.mjs'); await writeFile(path, code);
     const { AccountCenter } = await import(pathToFileURL(path).href);
     let directoryOpened = false;
@@ -35,7 +36,7 @@ test('super admin sees both dashboards without expiry and no self-grant buttons'
     await act(async () => { view = create(React.createElement(AccountCenter, props)); });
     const text = JSON.stringify(view.toJSON());
     assert.match(text, /Job Hunt Pass tools/); assert.match(text, /Monthly Alert Pass tools/);
-    assert.match(text, /Unlimited access · no expiry/); assert.match(text, /Sponsor directory/); assert.match(text, /AI cover letter generator/); assert.match(text, /Graduate Visa Switch Planner/);
+    assert.match(text, /Subscriber checker/); assert.match(text, /Unlimited access · no expiry/); assert.match(text, /Sponsor directory/); assert.match(text, /AI cover letter generator/); assert.match(text, /Graduate Visa Switch Planner/);
     const buttons = () => view.root.findAllByType('button');
     const content = node => typeof node === 'string' ? node : (node.children || []).map(content).join(' ');
     const hasText = (element, value) => content(element).includes(value);
@@ -57,4 +58,22 @@ test('directory access migration keeps the paid check and adds the server-manage
   assert.match(sql, /revoke all on function public\.can_access_job_hunt\(\) from public, anon/i);
   assert.match(sql, /alter policy "members read active directory"/i);
   assert.match(sql, /alter policy "members read active directory metadata"/i);
+});
+
+test('checker appears only on active subscriber dashboards or the admin dashboard', async () => {
+ const cache=join(process.cwd(),'node_modules','.cache');await mkdir(cache,{recursive:true});const dir=await mkdtemp(join(cache,'account-gate-'));
+ try{
+  let entitlements=[];globalThis.__accountGateClient={from:()=>({select:async()=>({data:entitlements,error:null})}),rpc:async()=>({data:false,error:null}),auth:{signOut:async()=>({error:null})}};
+  await writeFile(join(dir,'directoryClient.mjs'),'export const directoryClient=globalThis.__accountGateClient;');
+  for(const name of ['PasswordField','AdminAnalytics','AdminApplications'])await writeFile(join(dir,`${name}.mjs`),`export const ${name}=()=>null;`);
+  await writeFile(join(dir,'SponsorshipChecker.mjs'),'import React from "react";export const SponsorshipChecker=()=>React.createElement("div",null,"Subscriber checker");');
+  const source=await readFile('src/AccountCenter.tsx','utf8');const compiled=await transformWithEsbuild(source,'src/AccountCenter.tsx',{jsx:'automatic'});let code=compiled.code;
+  for(const name of ['directoryClient','PasswordField','AdminAnalytics','AdminApplications','SponsorshipChecker'])code=code.replace(`"./${name}"`,`"./${name}.mjs"`);
+  const path=join(dir,'account.mjs');await writeFile(path,code);const {AccountCenter}=await import(pathToFileURL(path).href);
+  const props={recovering:false,onRecoveryComplete(){},goDirectory(){},goCv(){},goTools(){},goJournal(){},goAlerts(){},goInsights(){},goCover(){},goPlanner(){}};
+  const future=new Date(Date.now()+86400000).toISOString(),past=new Date(Date.now()-86400000).toISOString();
+  for(const [passes,expected] of [[[],false],[[{plan:'monthly_alert_pass',starts_at:past,expires_at:future,revoked_at:null}],true],[[{plan:'job_hunt_pass',starts_at:past,expires_at:future,revoked_at:null}],true],[[{plan:'job_hunt_pass',starts_at:past,expires_at:future,revoked_at:past}],false],[[{plan:'monthly_alert_pass',starts_at:past,expires_at:past,revoked_at:null}],false]]) {
+    entitlements=passes;let view;await act(async()=>{view=create(React.createElement(AccountCenter,{...props,session:{user:{id:'member',email:'member@example.test'}}}))});assert.equal(JSON.stringify(view.toJSON()).includes('Subscriber checker'),expected);await act(async()=>view.unmount());
+  }
+ }finally{delete globalThis.__accountGateClient;await rm(dir,{recursive:true,force:true})}
 });
