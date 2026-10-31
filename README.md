@@ -90,3 +90,7 @@ The account dashboard contains a checker for active Monthly Alert Pass or Job Hu
 ### Demo membership and account IDs
 
 Registration currently offers a **simulated** checkout: it collects no card details, charges £0 and does not create a paid subscription or entitlement. After email confirmation and sign-in, a demo enrollee receives a stable server-generated ScotSponsor account ID and a preview of their selected plan. The ID is unique per account, not proof of a unique person, verified identity or payment; the badge means only that the email address was confirmed. Existing manually granted passes and super-admin access remain authoritative. A production checkout requires an eligible payment provider, secure server-side webhook verification, lifecycle handling and corresponding entitlement controls before real payment or paid-only registration can be enforced.
+
+### Member-only workspace
+
+Only the public landing page and its introductory content are open to visitors. The workspace requires a confirmed, active manually granted Monthly Alert or Job Hunt pass (or super-admin access); the Job Hunt tools additionally require that pass. Demo sign-ups do not grant access. Job feed, job details and member chat are also enforced at the database boundary. The super-admin console and historical chats remain available to the admin only. Browser-delivered application code and general marketing content are not confidential; private data and server-side actions must always be protected independently.
