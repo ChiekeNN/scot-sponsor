@@ -6,6 +6,7 @@ test('requested messages are absent from the platform while government credits r
  const files=(await readdir('src')).filter(path=>/\.(tsx|ts|mjs)$/.test(path));
  for(const file of files){
   const content=await readFile(`src/${file}`,'utf8');
+  assert.doesNotMatch(content,/Private on this device:|Your CV draft and analysis stay in this browser\. The keyword check is a guide/);
   assert.doesNotMatch(content,/A starting point, not immigration advice\.|These summaries were checked against the linked GOV\.UK pages/);
   assert.doesNotMatch(content,/Member job alerts are not live yet\.|Email and messaging delivery are not connected, even for active passes\./);
   assert.doesNotMatch(content,/Contains public sector information licensed under the|Independent service; not affiliated with the UK Government\./);
