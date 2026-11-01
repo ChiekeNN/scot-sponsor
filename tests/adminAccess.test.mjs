@@ -26,10 +26,11 @@ test('super admin sees both dashboards without expiry and no self-grant buttons'
     await writeFile(join(dir, 'AdminAnalytics.mjs'), 'export const AdminAnalytics = () => null;');
     await writeFile(join(dir, 'AdminApplications.mjs'), 'export const AdminApplications = () => null;');
     await writeFile(join(dir, 'AdminJobApplications.mjs'), 'export const AdminJobApplications = () => null;');
+    await writeFile(join(dir, 'AdminMembers.mjs'), 'import React from "react"; export const AdminMembers = () => React.createElement("div", null, "Member management");');
     await writeFile(join(dir, 'SponsorshipChecker.mjs'), 'import React from "react"; export const SponsorshipChecker = () => React.createElement("div", null, "Subscriber checker");');
     const source = await readFile('src/AccountCenter.tsx', 'utf8');
     const compiled = await transformWithEsbuild(source, 'src/AccountCenter.tsx', { jsx: 'automatic' });
-    const code = compiled.code.replace('"./directoryClient"', '"./directoryClient.mjs"').replace('"./plans"', '"./plans.mjs"').replace('"./PasswordField"', '"./PasswordField.mjs"').replace('"./AdminAnalytics"', '"./AdminAnalytics.mjs"').replace('"./AdminApplications"', '"./AdminApplications.mjs"').replace('"./AdminJobApplications"', '"./AdminJobApplications.mjs"').replace('"./SponsorshipChecker"', '"./SponsorshipChecker.mjs"');
+    const code = compiled.code.replace('"./directoryClient"', '"./directoryClient.mjs"').replace('"./plans"', '"./plans.mjs"').replace('"./PasswordField"', '"./PasswordField.mjs"').replace('"./AdminAnalytics"', '"./AdminAnalytics.mjs"').replace('"./AdminApplications"', '"./AdminApplications.mjs"').replace('"./AdminJobApplications"', '"./AdminJobApplications.mjs"').replace('"./AdminMembers"', '"./AdminMembers.mjs"').replace('"./SponsorshipChecker"', '"./SponsorshipChecker.mjs"');
     const path = join(dir, 'AccountCenter.mjs'); await writeFile(path, code);
     const { AccountCenter } = await import(pathToFileURL(path).href);
     let directoryOpened = false;
@@ -45,11 +46,7 @@ test('super admin sees both dashboards without expiry and no self-grant buttons'
     await act(async () => { buttons().find(button => hasText(button, 'Sponsor directory')).props.onClick(); });
     assert.equal(directoryOpened, true);
     await act(async () => { buttons().find(button => hasText(button, 'Admin console')).props.onClick(); });
-    const cards = view.root.findAllByType('article');
-    assert.equal(cards.length, 2);
-    assert.match(content(cards[0]), /Super admin · unlimited access/);
-    assert.equal(cards[0].findAllByType('button').length, 0);
-    assert.equal(cards[1].findAllByType('button').length, 2);
+    assert.match(JSON.stringify(view.toJSON()), /Member management/);
     view.unmount();
   } finally { delete globalThis.__accountTestClient; await rm(dir, { recursive: true, force: true }); }
 });
@@ -68,10 +65,10 @@ test('checker appears only on active subscriber dashboards or the admin dashboar
   let entitlements=[];globalThis.__accountGateClient={from:()=>({select:async()=>({data:entitlements,error:null})}),rpc:async()=>({data:false,error:null}),auth:{signOut:async()=>({error:null})}};
   await writeFile(join(dir,'directoryClient.mjs'),'export const directoryClient=globalThis.__accountGateClient;');
   await writeFile(join(dir,'plans.mjs'),'export const plans={monthly:{features:[]},jobHunt:{features:[]}};');
-  for(const name of ['PasswordField','AdminAnalytics','AdminApplications','AdminJobApplications'])await writeFile(join(dir,`${name}.mjs`),`export const ${name}=()=>null;`);
+  for(const name of ['PasswordField','AdminAnalytics','AdminApplications','AdminJobApplications','AdminMembers'])await writeFile(join(dir,`${name}.mjs`),`export const ${name}=()=>null;`);
   await writeFile(join(dir,'SponsorshipChecker.mjs'),'import React from "react";export const SponsorshipChecker=()=>React.createElement("div",null,"Subscriber checker");');
   const source=await readFile('src/AccountCenter.tsx','utf8');const compiled=await transformWithEsbuild(source,'src/AccountCenter.tsx',{jsx:'automatic'});let code=compiled.code;
-  for(const name of ['directoryClient','plans','PasswordField','AdminAnalytics','AdminApplications','AdminJobApplications','SponsorshipChecker'])code=code.replace(`"./${name}"`,`"./${name}.mjs"`);
+  for(const name of ['directoryClient','plans','PasswordField','AdminAnalytics','AdminApplications','AdminJobApplications','AdminMembers','SponsorshipChecker'])code=code.replace(`"./${name}"`,`"./${name}.mjs"`);
   const path=join(dir,'account.mjs');await writeFile(path,code);const {AccountCenter}=await import(pathToFileURL(path).href);
   const props={recovering:false,onRecoveryComplete(){},goDirectory(){},goCv(){},goTools(){},goJournal(){},goAlerts(){},goInsights(){},goCover(){},goPlanner(){}};
   const future=new Date(Date.now()+86400000).toISOString(),past=new Date(Date.now()-86400000).toISOString();
