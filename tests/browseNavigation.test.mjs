@@ -24,6 +24,7 @@ test('browse links work for guests and members; history and access gates remain 
    Landing:'import React from "react";export const PublicLanding=({onBrowse,jobFeed})=>React.createElement(React.Fragment,null,React.createElement("button",{id:"browse-go",onClick:()=>onBrowse({kind:"industry",id:"engineering"})},"Browse engineering"),jobFeed);export const AccessModal=()=>null;',
    plans:'export const plans={monthly:{name:"monthly",price:"",period:"",description:"",features:[],terms:""},jobHunt:{name:"job",price:"",period:"",description:"",features:[],terms:""}};',
    CvStudio:`${noop} export const CvStudio=component;`,Journal:`${noop} export const Journal=component;`,SponsorDirectory:`${noop} export const SponsorDirectory=component;`,AccountCenter:`${noop} export const AccountCenter=component;`,
+   AdminMembers:`${noop} export const AdminMembers=component;`,
    AdminAlerts:`${noop} export const AdminAlerts=component;export const useAdminAlerts=()=>({isAdmin:false,feed:null,error:null,refresh(){}});`,
    ImmigrationGuide:`${noop} export const ImmigrationGuide=component;`,
    CommunityForum:`${noop} export const CommunityForum=component;`,
